@@ -1,7 +1,19 @@
-const labelStyle = "block text-[10px] font-black text-blue-600/70 uppercase mb-2 tracking-widest ml-1";
-const inputStyle = "w-full border border-blue-100/50 rounded-xl py-3.5 px-4 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all bg-blue-50/30 focus:bg-white text-slate-700 placeholder:text-slate-400";
-const buttonPrimary = "flex items-center justify-center bg-blue-600 text-white py-3 px-6 rounded-xl font-bold hover:bg-blue-700 active:scale-[0.98] transition-all shadow-lg shadow-blue-500/20 disabled:opacity-50";
-const socialButtonStyle = "flex items-center justify-center w-full py-3 px-4 border border-slate-200 rounded-xl font-bold text-slate-700 hover:bg-slate-50 transition-all space-x-3 text-sm";
+const labelStyle =
+  "block text-[10px] font-black uppercase mb-2 tracking-widest ml-1 text-blue-600/70 dark:text-blue-400/80";
+
+const inputStyle =
+  "w-full border rounded-xl py-3.5 px-4 outline-none transition-all text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 " +
+  "bg-blue-50/30 dark:bg-slate-800 border-blue-100/50 dark:border-slate-700 " +
+  "focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 dark:focus:border-blue-400 dark:focus:bg-slate-800";
+
+const buttonPrimary =
+  "flex items-center justify-center bg-blue-600 text-white py-3 px-6 rounded-xl font-bold hover:bg-blue-700 active:scale-[0.98] transition-all shadow-lg shadow-blue-500/20 disabled:opacity-50";
+
+const socialButtonStyle =
+  "flex items-center justify-center w-full py-3 px-4 border rounded-xl font-bold transition-all space-x-3 text-sm " +
+  "border-slate-200 dark:border-slate-700 " +
+  "text-slate-700 dark:text-slate-200 " +
+  "hover:bg-slate-50 dark:hover:bg-slate-800";
 
 const SocialAuth = ({ type }) => (
   <div className="space-y-3">
@@ -14,11 +26,15 @@ const SocialAuth = ({ type }) => (
       </svg>
       <span>Continue with Google</span>
     </button>
+
     <div className="relative flex items-center py-4">
-      <div className="flex-grow border-t border-slate-100"></div>
-      <span className="flex-shrink mx-4 text-slate-400 text-[10px] font-bold uppercase tracking-widest">Or use {type}</span>
-      <div className="flex-grow border-t border-slate-100"></div>
+      <div className="flex-grow border-t border-slate-100 dark:border-slate-700"></div>
+      <span className="flex-shrink mx-4 text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
+        Or use {type}
+      </span>
+      <div className="flex-grow border-t border-slate-100 dark:border-slate-700"></div>
     </div>
   </div>
 );
+
 export default SocialAuth;

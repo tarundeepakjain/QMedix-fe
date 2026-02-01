@@ -16,7 +16,10 @@ export default function App() {
   const [view, setView] = useState('HOME');
   const [user, setUser] = useState(null);
   const [usersDb, setUsersDb] = useState(initialUsers);
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => {
+    return localStorage.getItem("theme") === "dark";
+  });
+
 
   const handleRegister = (newUser) => {
     setUsersDb([...usersDb, newUser]);
@@ -37,13 +40,16 @@ export default function App() {
   useEffect(() => {
     if (darkMode) {
       document.documentElement.classList.add("dark");
+      localStorage.setItem("theme", "dark");
     } else {
       document.documentElement.classList.remove("dark");
+      localStorage.setItem("theme", "light");
     }
   }, [darkMode]);
 
+
   return (
-    <div className="min-h-screen bg-white text-slate-900 font-sans">
+    <div className="min-h-screen font-sans transition-colors duration-500 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
       <Navbar
         user={user}
         onNavigate={setView}
@@ -67,7 +73,7 @@ export default function App() {
         )}
       </main>
 
-      <footer className="mt-20 py-16 bg-slate-50 border-t border-slate-100">
+      <footer className="mt-20 py-16  bg-slate-50 dark:bg-slate-900  border-t border-slate-100 dark:border-slate-800 transition-colors">
         <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-4 gap-12">
           <div className="col-span-2">
             <div className="flex items-center space-x-3 mb-6">

@@ -1,5 +1,23 @@
 @import "tailwindcss";
 
+/* Enable class-based dark mode */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Base page styling */
+:root {
+  --bg-light: #f8fafc;   /* slate-50 */
+  --bg-dark: #0f172a;    /* slate-950 */
+  --text-light: #0f172a; /* slate-900 */
+  --text-dark: #f1f5f9;  /* slate-100 */
+}
+
 body {
-  @apply bg-white dark:bg-slate-950 transition-colors duration-300;
+  background: var(--bg-light);
+  color: var(--text-light);
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+.dark body {
+  background: var(--bg-dark);
+  color: var(--text-dark);
 }

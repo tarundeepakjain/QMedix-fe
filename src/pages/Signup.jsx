@@ -13,10 +13,14 @@ import {
 import SocialAuth from "../components/SocialAuth";
 
 const labelStyle =
-    "block text-[10px] font-black text-blue-600/70 uppercase mb-2 tracking-widest ml-1";
+    "block text-[10px] font-black text-blue-600/70 dark:text-blue-400/70 uppercase mb-2 tracking-widest ml-1";
 
 const inputStyle =
-    "w-full border border-blue-100/50 rounded-xl py-3.5 px-4 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all bg-blue-50/30 focus:bg-white text-slate-700 placeholder:text-slate-400";
+    "w-full border rounded-xl py-3.5 px-4 outline-none transition-all text-sm " +
+    "bg-blue-50/40 dark:bg-slate-800/60 " +
+    "border-blue-100/60 dark:border-slate-700 " +
+    "text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 " +
+    "focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500";
 
 const buttonPrimary =
     "flex items-center justify-center bg-blue-600 text-white py-3 px-6 rounded-xl font-bold hover:bg-blue-700 active:scale-[0.98] transition-all shadow-lg shadow-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed";
@@ -25,7 +29,8 @@ const Signup = ({ onRegister }) => {
     const [step, setStep] = useState(1); // 1: Role, 2: Form, 3: Email Verification
     const [role, setRole] = useState('patient');
     const [data, setData] = useState({
-        name: '',
+        fullName: '',
+        hospitalName: '',
         email: '',
         password: '',
         address: '',
@@ -90,11 +95,13 @@ const Signup = ({ onRegister }) => {
     ];
 
     return (
-        <div className="max-w-xl mx-auto mt-12 p-10 bg-white rounded-[2.5rem] shadow-2xl shadow-blue-900/5 border border-white animate-in slide-in-from-bottom-4 duration-500">
+        <div className="max-w-xl mx-auto mt-12 p-10 rounded-[2.5rem] shadow-2xl transition-colors bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl
+    border border-slate-100 dark:border-slate-700
+    animate-in slide-in-from-bottom-4 duration-500">
 
             {step === 1 && (
                 <>
-                    <h2 className="text-3xl font-black text-slate-900 text-center mb-8">Choose your profile</h2>
+                    <h2 className="text-3xl font-black text-slate-900 dark:text-white text-center mb-8">Choose your profile</h2>
                     <div className="space-y-8">
                         <SocialAuth type="role selection" />
                         <div className="grid grid-cols-2 gap-4">
@@ -104,9 +111,12 @@ const Signup = ({ onRegister }) => {
                                 { id: 'staff', l: 'Staff', i: <ClipboardList />, c: 'text-amber-600 bg-amber-50' },
                                 { id: 'admin', l: 'Admin', i: <ShieldCheck />, c: 'text-emerald-600 bg-emerald-50' }
                             ].map(r => (
-                                <button key={r.id} onClick={() => { setRole(r.id); setStep(2); }} className="p-6 border border-slate-100 rounded-2xl text-center hover:border-blue-600 hover:shadow-lg transition-all group">
+                                <button key={r.id} onClick={() => { setRole(r.id); setStep(2); }} className="p-6 border rounded-2xl text-center transition-all group
+    border-slate-100 dark:border-slate-700
+    bg-white dark:bg-slate-800/60
+    hover:border-blue-600 hover:shadow-lg">
                                     <div className={`w-12 h-12 ${r.c} rounded-xl mx-auto mb-3 flex items-center justify-center group-hover:scale-110 transition-transform`}>{r.i}</div>
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-700">{r.l}</span>
+                                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-700 dark:text-slate-200">{r.l}</span>
                                 </button>
                             ))}
                         </div>
@@ -116,12 +126,12 @@ const Signup = ({ onRegister }) => {
 
             {step === 2 && (
                 <form className="space-y-4" onSubmit={handleFormSubmit}>
-                    <h2 className="text-3xl font-black text-slate-900 text-center mb-4">Account Details</h2>
-                    <p className="text-slate-400 text-center text-xs font-bold uppercase tracking-widest mb-8">Role: {role}</p>
+                    <h2 className="text-3xl font-black text-slate-900 dark:text-white text-center mb-4">Account Details</h2>
+                    <p className="text-slate-400 dark:text-slate-500 text-center text-xs font-bold uppercase tracking-widest mb-8">Role: {role}</p>
 
                     <div className="space-y-1">
                         <label className={labelStyle}>Full Name</label>
-                        <input required className={inputStyle} placeholder="John Doe" value={data.name} onChange={e => setData({ ...data, name: e.target.value })} />
+                        <input required className={inputStyle} placeholder="John Doe" value={data.fullName} onChange={e => setData({ ...data, fullName: e.target.value })} />
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
@@ -145,7 +155,8 @@ const Signup = ({ onRegister }) => {
                     </div>
 
                     {/* Password Validation Feedback */}
-                    <div className="p-4 bg-slate-50 rounded-2xl grid grid-cols-2 gap-y-2 gap-x-4">
+                    <div className="p-4 rounded-2xl grid grid-cols-2 gap-y-2 gap-x-4 bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700">
+
                         <div className={`flex items-center text-[10px] font-bold uppercase tracking-wider ${passwordChecks.length ? 'text-emerald-600' : 'text-slate-400'}`}>
                             {passwordChecks.length ? <CheckCircle2 size={12} className="mr-2" /> : <AlertCircle size={12} className="mr-2" />} Min 6 Characters
                         </div>
@@ -246,8 +257,8 @@ const Signup = ({ onRegister }) => {
                             <div className="space-y-1">
                                 <label className={labelStyle}>Hospital Name</label>
                                 <input required className={inputStyle} placeholder="Apollo Hospital"
-                                    value={data.name}
-                                    onChange={e => setData({ ...data, name: e.target.value })}
+                                    value={data.hospitalName}
+                                    onChange={e => setData({ ...data, hospitalName: e.target.value })}
                                 />
                             </div>
 
@@ -263,7 +274,11 @@ const Signup = ({ onRegister }) => {
 
 
                     <div className="flex gap-3 pt-4">
-                        <button type="button" onClick={() => setStep(1)} className="flex-1 bg-slate-100 font-bold py-4 rounded-xl text-slate-500 hover:bg-slate-200 transition-all">Back</button>
+                        <button type="button" onClick={() => setStep(1)} className="flex-1 font-bold py-4 rounded-xl transition-all
+    bg-slate-100 dark:bg-slate-800
+    text-slate-600 dark:text-slate-300
+    hover:bg-slate-200 dark:hover:bg-slate-700"
+                        >Back</button>
                         <button disabled={!isPasswordValid || !isEmailValid || isLoading} className={buttonPrimary + " flex-[2]"}>
                             {isLoading ? <Loader2 className="animate-spin" /> : "Verify Email"}
                         </button>
@@ -273,14 +288,14 @@ const Signup = ({ onRegister }) => {
 
             {step === 3 && (
                 <form className="space-y-6 text-center animate-in zoom-in-95 duration-300" onSubmit={verifyOtpAndRegister}>
-                    <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <div className="w-16 h-16 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center mx-auto mb-6">
                         <Mail size={32} />
                     </div>
-                    <h2 className="text-3xl font-black text-slate-900">Check your inbox</h2>
-                    <p className="text-slate-500 font-medium">We sent a 6-digit code to <span className="text-slate-900 font-bold">{data.email}</span>. Please enter it below to verify your account.</p>
+                    <h2 className="text-3xl font-black text-slate-900 dark:text-white">Check your inbox</h2>
+                    <p className="text-slate-500 dark:text-slate-400 font-medium">We sent a code to <span className="text-slate-900 dark:text-white font-bold">{data.email}</span></p>
 
                     <div className="relative max-w-[240px] mx-auto">
-                        <KeyRound className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={20} />
+                        <KeyRound className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 dark:text-slate-600" size={20} />
                         <input
                             autoFocus
                             required
@@ -296,7 +311,7 @@ const Signup = ({ onRegister }) => {
                         <button className={buttonPrimary + " w-full py-4 text-lg"}>Verify & Create Account</button>
                         <button type="button" onClick={() => setStep(2)} className="text-[10px] font-black uppercase tracking-widest text-blue-600 hover:underline">Entered wrong email?</button>
                     </div>
-                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-8">Note: Use code '123456' for this demo</p>
+                    <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-widest mt-8">Note: Use code '123456' for this demo</p>
                 </form>
             )}
         </div>
