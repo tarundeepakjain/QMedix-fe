@@ -1,9 +1,13 @@
 import { Activity, LogOut } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const buttonPrimary =
   "flex items-center justify-center bg-blue-600 text-white py-3 px-6 rounded-xl font-bold hover:bg-blue-700 active:scale-[0.98] transition-all shadow-lg shadow-blue-500/20 disabled:opacity-50";
 
-const Navbar = ({ user, onNavigate, onLogout, darkMode, setDarkMode }) => (
+const Navbar = ({ user, onLogout, darkMode, setDarkMode }) => {
+  const navigate = useNavigate();
+  return (
+    <>
   <nav
     className="sticky top-0 z-50 h-20 backdrop-blur-md border-b transition-colors
     bg-white/90 dark:bg-slate-900/80
@@ -15,7 +19,7 @@ const Navbar = ({ user, onNavigate, onLogout, darkMode, setDarkMode }) => (
       <div className="flex items-center space-x-12">
         <div
           className="flex items-center cursor-pointer group"
-          onClick={() => onNavigate("HOME")}
+          onClick={() =>navigate("/")}
         >
           <div className="bg-gradient-to-br from-blue-600 to-indigo-600 p-2 rounded-xl transition-transform group-hover:rotate-6 shadow-lg shadow-blue-500/20">
             <Activity className="h-5 w-5 text-white" />
@@ -27,19 +31,19 @@ const Navbar = ({ user, onNavigate, onLogout, darkMode, setDarkMode }) => (
 
         <div className="hidden md:flex items-center space-x-8">
           <button
-            onClick={() => onNavigate("HOME")}
+            onClick={() =>navigate("/")}
             className="font-black text-sm uppercase tracking-widest transition-colors text-slate-900 dark:text-slate-100 hover:text-blue-600"
           >
             Home
           </button>
           <button
-            onClick={() => onNavigate("HOME")}
+            onClick={() => navigate("/")}
             className="font-black text-sm uppercase tracking-widest transition-colors text-slate-400 dark:text-slate-500 hover:text-blue-600"
           >
             Services
           </button>
           <button
-            onClick={() => onNavigate("HOME")}
+            onClick={() => navigate("/")}
             className="font-black text-sm uppercase tracking-widest transition-colors text-slate-400 dark:text-slate-500 hover:text-blue-600"
           >
             Network
@@ -52,14 +56,14 @@ const Navbar = ({ user, onNavigate, onLogout, darkMode, setDarkMode }) => (
         {!user ? (
           <div className="flex items-center space-x-3">
             <button
-              onClick={() => onNavigate("LOGIN")}
+              onClick={() => navigate("/login")}
               className="font-bold px-4 transition-colors text-slate-600 dark:text-slate-300 hover:text-blue-600"
             >
               Login
             </button>
 
             <button
-              onClick={() => onNavigate("SIGNUP")}
+              onClick={() => navigate("/signup")}
               className={buttonPrimary + " !py-2.5 !px-5"}
             >
               Sign Up
@@ -100,6 +104,8 @@ const Navbar = ({ user, onNavigate, onLogout, darkMode, setDarkMode }) => (
       </div>
     </div>
   </nav>
-);
+    </>
+  );
+};
 
 export default Navbar;

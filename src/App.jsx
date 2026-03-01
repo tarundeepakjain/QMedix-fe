@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Activity } from 'lucide-react';
+import { Routes, Route, Navigate } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
@@ -52,13 +53,20 @@ export default function App() {
     <div className="min-h-screen font-sans transition-colors duration-500 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
       <Navbar
         user={user}
-        onNavigate={setView}
-        onLogout={() => { setUser(null); setView('HOME'); }}
+        onLogout={() => { setUser(null) }}
         darkMode={darkMode}
         setDarkMode={setDarkMode}
       />
-
-      <main className="max-w-7xl mx-auto px-6 py-12">
+  <Routes>
+    <Route path="/" element={<Home />} />
+    <Route path="/login" element={<Login />} />
+    <Route path="/signup" element={<Signup />} />
+   <Route path="/dashboard/patient" element={<PatientDashboard />} />
+   <Route path="/dashboard/patient" element={<DoctorDashboard />} />
+   <Route path="/dashboard/admin" element={<AdminDashboard />} />
+   <Route path="/dashboard/reception" element={<ReceptionDashboard />} />
+    </Routes>
+      {/* <main className="max-w-7xl mx-auto px-6 py-12">
         {view === 'HOME' && <Home onNavigate={setView} />}
         {view === 'LOGIN' && <Login onLogin={handleLogin} />}
         {view === 'SIGNUP' && <Signup onRegister={handleRegister} />}
@@ -71,7 +79,7 @@ export default function App() {
             {user.role === 'reception' && <ReceptionDashboard user={user} />}
           </>
         )}
-      </main>
+      </main> */}
 
       <footer className="mt-20 py-16  bg-slate-50 dark:bg-slate-900  border-t border-slate-100 dark:border-slate-800 transition-colors">
         <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-4 gap-12">

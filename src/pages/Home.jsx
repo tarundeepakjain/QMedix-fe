@@ -1,9 +1,13 @@
 import { ArrowRight, Clock, ShieldCheck, Globe, Activity, Zap } from "lucide-react";
-
+import { useNavigate } from "react-router-dom";
 const buttonPrimary =
   "flex items-center justify-center bg-blue-600 text-white py-3 px-6 rounded-xl font-bold hover:bg-blue-700 active:scale-[0.98] transition-all shadow-lg shadow-blue-500/20 disabled:opacity-50";
 
-const Home = ({ onNavigate }) => (
+const Home = () => {
+  const navigate=useNavigate();
+  return(
+    <>
+  
   <div className="min-h-screen transition-colors duration-500
       bg-gradient-to-br from-blue-50 via-white to-indigo-50
       dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
@@ -42,7 +46,7 @@ const Home = ({ onNavigate }) => (
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <button
-            onClick={() => onNavigate("SIGNUP")}
+            onClick={() => navigate("/signup")}
             className={buttonPrimary + " !px-10 !py-5 text-lg shadow-2xl"}
           >
             Get Started Now <ArrowRight className="ml-3" />
@@ -116,6 +120,8 @@ const Home = ({ onNavigate }) => (
     </section>
 
   </div>
-);
+    </>
+  )
+};
 
 export default Home;

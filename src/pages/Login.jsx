@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Mail, Eye, EyeOff, Loader2, KeyRound } from "lucide-react";
+import { Mail, Eye, EyeOff, Loader2, KeyRound, Phone, User } from "lucide-react";
 import SocialAuth from "../components/SocialAuth";
-
+import axios from "axios";
+import {useNavigate} from "react-router-dom";
 const labelStyle =
   "block text-[10px] font-black text-blue-600/70 uppercase mb-2 tracking-widest ml-1";
 
@@ -15,10 +16,34 @@ const inputStyle =
 const buttonPrimary =
   "flex items-center justify-center bg-blue-600 text-white py-3 px-6 rounded-xl font-bold hover:bg-blue-700 active:scale-[0.98] transition-all shadow-lg shadow-blue-500/20 disabled:opacity-50";
 
-export default function Login({ onLogin }) {
+export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const navigate=useNavigate();
 
+
+const handleLogin=async(name,email,phone,password)=>{
+if(!email || !phone ||!password ||!name){
+alert("all fields are required");
+}
+try {
+  const res=await axios.post(`${import.meta.env.VITE_BACKEND_URL}/auth/signup/patient`,{
+    name,
+    email,
+    phone,
+    password
+  })
+  if(res.status=200 || res.status==201){
+  alert("signup done");
+  navigate("/");
+
+  }
+
+} catch (error) {
+  console.log("Login Error:",error);
+}
+setLoading(false);
+}
   return (
     <div className="max-w-md mx-auto mt-16 p-10 rounded-[2.5rem] shadow-xl border transition-colors bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-slate-100 dark:border-slate-700">
       
@@ -45,13 +70,25 @@ export default function Login({ onLogin }) {
         onSubmit={(e) => {
           e.preventDefault();
           setLoading(true);
-          setTimeout(() => {
-            onLogin(e.target.email.value, e.target.password.value);
-            setLoading(false);
-          }, 1000);
+          handleLogin(e.target.uname.value,e.target.email.value,e.target.phone.value,e.target.password.value);
+        
         }}
         className="space-y-6"
       >
+         <div>
+          <label className={labelStyle}>Name</label>
+          <div className="relative">
+            <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+            <input
+              name="uname"
+              required
+              type="uname"
+              placeholder="e.g. Tarun"
+              className={inputStyle + " pl-11"}
+            />
+          </div>
+        </div>
+
         <div>
           <label className={labelStyle}>Email Address</label>
           <div className="relative">
@@ -61,6 +98,20 @@ export default function Login({ onLogin }) {
               required
               type="email"
               placeholder="you@example.com"
+              className={inputStyle + " pl-11"}
+            />
+          </div>
+        </div>
+
+         <div>
+          <label className={labelStyle}>Phone</label>
+          <div className="relative">
+            <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+            <input
+              name="phone"
+              required
+              type="phone"
+              placeholder="92xxxxxxx"
               className={inputStyle + " pl-11"}
             />
           </div>
