@@ -76,7 +76,7 @@ setLoading(false);
         onSubmit={(e) => {
           e.preventDefault();
           setLoading(true);
-          handleLogin(e.target.uname.value,e.target.email.value,e.target.phone.value,e.target.password.value);
+          handleLogin(e.target.email.value,e.target.password.value);
         
         }}
         className="space-y-6"
