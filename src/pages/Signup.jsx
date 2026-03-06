@@ -25,7 +25,7 @@ const inputStyle =
 const buttonPrimary =
     "flex items-center justify-center bg-blue-600 text-white py-3 px-6 rounded-xl font-bold hover:bg-blue-700 active:scale-[0.98] transition-all shadow-lg shadow-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed";
 
-const Signup = ({ onRegister }) => {
+const Signup = () => {
     const [step, setStep] = useState(1); // 1: Role, 2: Form, 3: Email Verification
     const [role, setRole] = useState('patient');
     const [data, setData] = useState({
@@ -52,6 +52,42 @@ const Signup = ({ onRegister }) => {
                 /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
             );
     };
+
+    const sendotp=async()=>{
+     try {
+        const res=await api("post","auth/send-otp",{email:data.email});
+        if(res.status===200){
+            Alert("otp sent");
+             setStep(3)
+        }
+      
+     } catch (error) {
+        Alert("otp could not sent");
+        window.location.reload();
+        console.error(error);
+     }
+    }
+    const verifyOTP=async()=>{
+        try {
+            if(otp==="123456"){
+                Alert("email verified successfully");
+               handleSingup();
+               return;
+            }
+            else{
+
+            const res=await api("method","auth/verify-otp",{email:data.email,otp});
+            if(res.status===200){
+                Alert("email verified successfully");
+                handleSingup();
+                return;
+            }
+        }
+        } catch (error) {
+            Alert("wrong otp entered, try again");
+            console.error(error);
+        }
+    }
     const handleSingup=async()=>{
         if(role==='patient'){
             handlePatientSignin();
@@ -62,7 +98,10 @@ const Signup = ({ onRegister }) => {
         else if(role==='staff'){
             handleStaffSignin();
         }
-        
+        else{
+            handleHospitalSignin();
+        }
+        setStep(3);
     }
 const handlePatientSignin=async()=>{
     setIsLoading(true);
@@ -77,7 +116,7 @@ try {
     password:data.password,
     address:data.address
   })
-  if(res.status=200 || res.status==201){
+  if(res.status===200 || res.status===201){
   alert("Patient signup done");
   navigate("/");
   }
@@ -105,7 +144,7 @@ try {
     speciality:data.speciality,
     hospital_id:data.hospital_id
   })
-  if(res.status=200 || res.status==201){
+  if(res.status===200 || res.status===201){
   alert("Doctor signup done");
   navigate("/");
   }
@@ -131,7 +170,7 @@ try {
     password:data.password,
     address:data.address
   })
-  if(res.status=200 || res.status==201){
+  if(res.status===200 || res.status===201){
   alert("Hospital signup done");
   navigate("/");
   }
@@ -158,7 +197,7 @@ try {
     address:data.address,
     hospital_id:data.hospital_id
   })
-  if(res.status=200 || res.status==201){
+  if(res.status===200 || res.status===201){
   alert("Staff signup done");
   navigate("/");
   }
@@ -242,7 +281,7 @@ setIsLoading(false);
             )}
 
             {step === 2 && (
-                <form className="space-y-4" onSubmit={handleFormSubmit}>
+                <form className="space-y-4" >
                     <h2 className="text-3xl font-black text-slate-900 dark:text-white text-center mb-4">Account Details</h2>
                     <p className="text-slate-400 dark:text-slate-500 text-center text-xs font-bold uppercase tracking-widest mb-8">Role: {role}</p>
 
@@ -396,7 +435,7 @@ setIsLoading(false);
     text-slate-600 dark:text-slate-300
     hover:bg-slate-200 dark:hover:bg-slate-700"
                         >Back</button>
-                        {/* <button disabled={!isPasswordValid || !isEmailValid || isLoading} className={buttonPrimary + " flex-[2]"}>
+                        {/* <button onClick={sendotp}disabled={!isPasswordValid || !isEmailValid || isLoading} className={buttonPrimary + " flex-[2]"}>
                             {isLoading ? <Loader2 className="animate-spin" /> : "Verify Email"}
                         </button> */}
                          <button onClick={handleSingup}  className={buttonPrimary + " flex-[2]"}>
@@ -429,7 +468,7 @@ setIsLoading(false);
 
                     <div className="space-y-4">
                         <button className={buttonPrimary + " w-full py-4 text-lg"}>Verify & Create Account</button>
-                        <button type="button" onClick={() => setStep(2)} className="text-[10px] font-black uppercase tracking-widest text-blue-600 hover:underline">Entered wrong email?</button>
+                        <button type="button" onClick={()=>setStep(3)} className="text-[10px] font-black uppercase tracking-widest text-blue-600 hover:underline">Entered wrong email?</button>
                     </div>
                     <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-widest mt-8">Note: Use code '123456' for this demo</p>
                 </form>
