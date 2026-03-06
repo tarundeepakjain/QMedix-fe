@@ -5,8 +5,7 @@ import { RefreshCcw, Plus, Ticket, Loader2 } from 'lucide-react';
 import PatientHeader from '../../components/patient/PatientHeader';
 import LiveQueueCard from '../../components/patient/LiveQueueCard';
 import HistoryTable from '../../components/patient/HistoryTable';
-
-const API_BASE_URL = "http://localhost:5500"; 
+import api from "../../services/apiWrapper.js";
 
 export default function PatientDashboard({ user, isDark, toggleTheme, onLogout }) {
   const [queueData, setQueueData] = useState([]);
@@ -14,25 +13,53 @@ export default function PatientDashboard({ user, isDark, toggleTheme, onLogout }
 
   // Simulated data fetch - this is where your apiWrapper logic will go later
   const loadData = async () => {
-    // FIX: Turn off loading if there is no user
-    if (!user) {
-      setLoading(false);
-      return; 
-    }
-    
-    setLoading(true);
-    try {
-      await new Promise(resolve => setTimeout(resolve, 800));
-      setQueueData([
-        { id: '1', hospital_name: 'Apollo Central', speciality: 'Cardiology', doctor_name: 'Dr. Aristhoth', token_number: 'Q-042', serving_token: 'Q-038', isEmergency: true, status: 'Waiting' },
-        { id: '2', hospital_name: 'St. Marys Medical', speciality: 'Neurology', doctor_name: 'Dr. Mike Ross', token_number: 'B-012', serving_token: 'B-011', isEmergency: false, status: 'In-Progress' }
-      ]);
-    } catch (err) {
-      console.error("Failed to fetch queue data:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+      if (!user) {
+        setLoading(false);
+        return;
+      }
+
+      setLoading(true);
+
+      try {
+        const res = await api("GET","patient/get-appointments");
+        const result = res.data;
+
+        const formattedData = result.data.map((appointment) => ({
+          id: appointment.appointment_id,
+
+          hospital_name: appointment.hospital_name || "Unknown Hospital",
+
+          speciality: appointment.department || "General",
+
+          doctor_name: appointment.assigned_doctor || "Not Assigned",
+
+          token_number: appointment.token_number
+            ? `Q-${appointment.token_number}`
+            : "Pending",
+
+          serving_token: appointment.serving_token
+            ? `Q-${appointment.serving_token}`
+            : "N/A",
+
+          isEmergency: appointment.isEmergency || false,
+
+          status:
+            appointment.status === "waiting"
+              ? "Waiting"
+              : appointment.status === "in_progress"
+              ? "In-Progress"
+              : appointment.status === "completed"
+              ? "Completed"
+              : appointment.status,
+        }));
+
+        setQueueData(formattedData);
+      } catch (err) {
+        console.error("Failed to fetch queue data:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
   // Load data when the component mounts or the user changes
   useEffect(() => { 
