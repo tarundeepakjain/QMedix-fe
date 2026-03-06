@@ -21,14 +21,8 @@ export default function PatientDashboard({ user, isDark, toggleTheme, onLogout }
       setLoading(true);
 
       try {
-const res = await fetch("http://localhost:6232/patient/get-appointments", {
-  method: "GET",
-  credentials: "include",   // important
-  headers: {
-    "Content-Type": "application/json"
-  }
-});
-        const result = await res.json();
+        const res = await api("GET","patient/get-appointments");
+        const result = res.data;
 
         const formattedData = result.data.map((appointment) => ({
           id: appointment.appointment_id,
