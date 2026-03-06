@@ -19,7 +19,7 @@ const Navbar = ({ user, onLogout, darkMode, setDarkMode }) => {
       <div className="flex items-center space-x-12">
         <div
           className="flex items-center cursor-pointer group"
-          onClick={() =>navigate("/")}
+          oonClick={() => navigate(user ? "/dashboard" : "/")}
         >
           <div className="bg-gradient-to-br from-blue-600 to-indigo-600 p-2 rounded-xl transition-transform group-hover:rotate-6 shadow-lg shadow-blue-500/20">
             <Activity className="h-5 w-5 text-white" />
@@ -31,19 +31,19 @@ const Navbar = ({ user, onLogout, darkMode, setDarkMode }) => {
 
         <div className="hidden md:flex items-center space-x-8">
           <button
-            onClick={() =>navigate("/")}
+            onClick={() => navigate(user ? "/dashboard" : "/")}
             className="font-black text-sm uppercase tracking-widest transition-colors text-slate-900 dark:text-slate-100 hover:text-blue-600"
           >
             Home
           </button>
           <button
-            onClick={() => navigate("/")}
+            onClick={() => navigate(user ? "/dashboard" : "/")}
             className="font-black text-sm uppercase tracking-widest transition-colors text-slate-400 dark:text-slate-500 hover:text-blue-600"
           >
             Services
           </button>
           <button
-            onClick={() => navigate("/")}
+            onClick={() => navigate(user ? "/dashboard" : "/")}
             className="font-black text-sm uppercase tracking-widest transition-colors text-slate-400 dark:text-slate-500 hover:text-blue-600"
           >
             Network

@@ -51,10 +51,6 @@ const Home = () => {
           >
             Get Started Now <ArrowRight className="ml-3" />
           </button>
-
-          <button className="px-10 py-5 text-slate-600 dark:text-slate-300 font-bold hover:bg-white/60 dark:hover:bg-slate-700/60 rounded-xl transition-all">
-            Watch Demo
-          </button>
         </div>
       </div>
     </section>

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Mail, Eye, EyeOff, Loader2, KeyRound, Phone, User } from "lucide-react";
 import SocialAuth from "../components/SocialAuth";
 import axios from "axios";
-import {useNavigate} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import api from "../services/apiWrapper";
 const labelStyle =
   "block text-[10px] font-black text-blue-600/70 uppercase mb-2 tracking-widest ml-1";
@@ -17,41 +17,47 @@ const inputStyle =
 const buttonPrimary =
   "flex items-center justify-center bg-blue-600 text-white py-3 px-6 rounded-xl font-bold hover:bg-blue-700 active:scale-[0.98] transition-all shadow-lg shadow-blue-500/20 disabled:opacity-50";
 
-export default function Login() {
+export default function Login({ onLogin }) {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const navigate=useNavigate();
-const roles=[
- { id:"patient", name:"Patient"},
- {id:"hospital",name:"Hospital"} ,
- {id:"doctor",name:"Dcotor"} ,
-  {id:"hospital-staff",name:"Staff"}
-]
-const [role,setRole]=useState("Select User role");
-const handleLogin=async(email,password)=>{
-if(!email ||!password ||!role){
-alert("all fields are required");
-}
-try {
-  const res=await api("post",`auth/login/${role}`,{
-    email,
-    password
-  })
-  if(res.status=200 || res.status==201){
-  alert(`${role} Login done`);
-  navigate("/");
-  }
-  else{
-    alert("login failed");
-  }
-} catch (error) {
-  console.log(`${role} Login Error:`,error);
-}
-setLoading(false);
-}
+  const roles = [
+    { id: "patient", name: "Patient" },
+    { id: "hospital", name: "Hospital" },
+    { id: "doctor", name: "Doctor" },
+    { id: "hospital-staff", name: "Staff" }
+  ]
+  const [role, setRole] = useState("");
+  const handleLogin = async (email, password) => {
+    if (!email || !password || !role) {
+      alert("All fields are required");
+      return;
+    }
+
+    try {
+      const res = await api("post", `auth/login/${role}`, {
+        email,
+        password,
+      });
+
+      if (res.status === 200 || res.status === 201) {
+        // 2. INSTEAD OF NAVIGATING HERE, PASS THE DATA TO APP.JSX!
+        // Pass a user object so App.jsx knows exactly who logged in.
+        // (If your backend sends user data in res.data, use that instead!)
+        onLogin({ email: email, role: role });
+
+      } else {
+        alert("Login failed");
+      }
+    } catch (error) {
+      console.log(`${role} Login Error:`, error);
+      alert("Invalid credentials.");
+    }
+
+    setLoading(false);
+  };
   return (
     <div className="max-w-md mx-auto mt-16 p-10 rounded-[2.5rem] shadow-xl border transition-colors bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-slate-100 dark:border-slate-700">
-      
+
       {/* Header */}
       <div className="text-center mb-10">
         <h2 className="text-3xl font-black tracking-tight text-slate-900 dark:text-white">Welcome Back</h2>
@@ -75,12 +81,12 @@ setLoading(false);
         onSubmit={(e) => {
           e.preventDefault();
           setLoading(true);
-          handleLogin(e.target.email.value,e.target.password.value);
-        
+          handleLogin(e.target.email.value, e.target.password.value);
+
         }}
         className="space-y-6"
       >
-  
+
         <div>
           <label className={labelStyle}>Email Address</label>
           <div className="relative">
@@ -116,21 +122,26 @@ setLoading(false);
             </button>
           </div>
         </div>
-        
 
-        
-                            <div className="space-y-1">
-                                <label className={labelStyle}>role</label>
-                                <select required className={inputStyle}
-                                    value={role}
-                                    onChange={e => setRole(e.target.value)}
-                                >
-                                    <option key="" value="">{role}</option>
-                                    {roles.map(h => (
-                                        <option key={h.id} value={h.id}>{h.name}</option>
-                                    ))}
-                                </select>
-                            </div>
+
+
+        <div className="space-y-1">
+          <label className={labelStyle}>role</label>
+          <select
+            required
+            className={inputStyle}
+            value={role}
+            onChange={e => setRole(e.target.value)}
+          >
+            <option value="">Select User Role</option>
+
+            {roles.map(r => (
+              <option key={r.id} value={r.id}>
+                {r.name}
+              </option>
+            ))}
+          </select>
+        </div>
 
         <button disabled={loading} className={buttonPrimary + " w-full mt-4"}>
           {loading ? <Loader2 className="animate-spin" /> : "Login to Dashboard"}
