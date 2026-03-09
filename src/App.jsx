@@ -11,7 +11,7 @@ import DoctorDashboard from "./pages/doctor/DoctorDashboard";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import ReceptionDashboard from "./pages/reception/ReceptionDashboard";
 import BookAppointment from "./pages/patient/BookAppointment";
-
+import { AuthProvider } from './context/authContext';
 import { supabase } from "./services/supabaseClient";
 
 export default function App() {
@@ -81,7 +81,7 @@ export default function App() {
         darkMode={darkMode}
         setDarkMode={setDarkMode}
       />
-
+<AuthProvider>
       <Routes>
         {/* PUBLIC ROUTES */}
         <Route path="/" element={<Home />} />
@@ -110,6 +110,7 @@ export default function App() {
           element={user ? <BookAppointment user={user} /> : <Navigate to="/login" replace />}
         />
       </Routes>
+      </AuthProvider>
 
       <footer className="mt-20 py-16 bg-slate-50 dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 transition-colors">
         <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-4 gap-12">

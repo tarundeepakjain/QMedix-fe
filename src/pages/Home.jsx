@@ -1,10 +1,13 @@
 import { ArrowRight, Clock, ShieldCheck, Globe, Activity, Zap } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/authContext";
 const buttonPrimary =
   "flex items-center justify-center bg-blue-600 text-white py-3 px-6 rounded-xl font-bold hover:bg-blue-700 active:scale-[0.98] transition-all shadow-lg shadow-blue-500/20 disabled:opacity-50";
 
 const Home = () => {
   const navigate=useNavigate();
+  const {user}=useAuth();
+  console.log(user);
   return(
     <>
   
