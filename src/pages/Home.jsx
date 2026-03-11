@@ -7,7 +7,7 @@ const buttonPrimary =
 const Home = () => {
   const navigate=useNavigate();
   const {user}=useAuth();
-  console.log(user);
+
   return(
     <>
   
