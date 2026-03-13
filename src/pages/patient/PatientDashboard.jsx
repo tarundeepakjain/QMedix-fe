@@ -37,7 +37,7 @@ export default function PatientDashboard({ user, isDark, toggleTheme, onLogout }
 
           token_number: appointment.token_number
             ? `Q-${appointment.token_number}`
-            : "Pending",
+            : "N/A",
 
           serving_token: appointment.serving_token
             ? `Q-${appointment.serving_token}`
