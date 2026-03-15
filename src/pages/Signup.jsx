@@ -10,7 +10,6 @@ import {
     KeyRound,
     Loader2
 } from "lucide-react";
-import SocialAuth from "../components/SocialAuth";
 import api from "../services/apiWrapper";
 const labelStyle =
     "block text-[10px] font-black text-blue-600/70 dark:text-blue-400/70 uppercase mb-2 tracking-widest ml-1";
@@ -53,162 +52,162 @@ const Signup = () => {
             );
     };
 
-    const sendotp=async()=>{
-     try {
-        const res=await api("post","auth/send-otp",{email:data.email});
-        if(res.status===200){
-            Alert("otp sent");
-             setStep(3)
-        }
-      
-     } catch (error) {
-        Alert("otp could not sent");
-        window.location.reload();
-        console.error(error);
-     }
-    }
-    const verifyOTP=async()=>{
+    const sendotp = async () => {
         try {
-            if(otp==="123456"){
-                Alert("email verified successfully");
-               handleSingup();
-               return;
+            const res = await api("post", "auth/send-otp", { email: data.email });
+            if (res.status === 200) {
+                Alert("otp sent");
+                setStep(3)
             }
-            else{
 
-            const res=await api("method","auth/verify-otp",{email:data.email,otp});
-            if(res.status===200){
+        } catch (error) {
+            Alert("otp could not sent");
+            window.location.reload();
+            console.error(error);
+        }
+    }
+    const verifyOTP = async () => {
+        try {
+            if (otp === "123456") {
                 Alert("email verified successfully");
                 handleSingup();
                 return;
             }
-        }
+            else {
+
+                const res = await api("method", "auth/verify-otp", { email: data.email, otp });
+                if (res.status === 200) {
+                    Alert("email verified successfully");
+                    handleSingup();
+                    return;
+                }
+            }
         } catch (error) {
             Alert("wrong otp entered, try again");
             console.error(error);
         }
     }
-    const handleSingup=async()=>{
-        if(role==='patient'){
+    const handleSingup = async () => {
+        if (role === 'patient') {
             handlePatientSignin();
         }
-        else if(role==='doctor'){
+        else if (role === 'doctor') {
             handleDoctorSignin();
         }
-        else if(role==='staff'){
+        else if (role === 'staff') {
             handleStaffSignin();
         }
-        else{
+        else {
             handleHospitalSignin();
         }
         setStep(3);
     }
-const handlePatientSignin=async()=>{
-    setIsLoading(true);
-if(!data.email || !data.phone ||!data.password ||!data.fullName || !data.address){
-alert("all fields are required");
-}
-try {
-  const res=await api("post","auth/signup/patient",{
-    name:data.fullName,
-    email:data.email,
-    phone:data.phone,
-    password:data.password,
-    address:data.address
-  })
-  if(res.status===200 || res.status===201){
-  alert("Patient signup done");
-  navigate("/");
-  }
-else{
-    alert("Signup failed");
-}
-} catch (error) {
-  console.log("Patient Signup error, Error:",error);
-}
-setIsLoading(false);
-}
+    const handlePatientSignin = async () => {
+        setIsLoading(true);
+        if (!data.email || !data.phone || !data.password || !data.fullName || !data.address) {
+            alert("all fields are required");
+        }
+        try {
+            const res = await api("post", "auth/signup/patient", {
+                name: data.fullName,
+                email: data.email,
+                phone: data.phone,
+                password: data.password,
+                address: data.address
+            })
+            if (res.status === 200 || res.status === 201) {
+                alert("Patient signup done");
+                navigate("/");
+            }
+            else {
+                alert("Signup failed");
+            }
+        } catch (error) {
+            console.log("Patient Signup error, Error:", error);
+        }
+        setIsLoading(false);
+    }
 
-const handleDoctorSignin=async()=>{
-    setIsLoading(true);
-if(!data.email || !data.phone ||!data.password ||!data.fullName || !data.address || !data.speciality){
-alert("all fields are required");
-}
-try {
-  const res=await api("post","auth/signup/doctor",{
-    name:data.fullName,
-    email:data.email,
-    phone:data.phone,
-    password:data.password,
-    address:data.address,
-    speciality:data.speciality,
-    hospital_id:data.hospital_id
-  })
-  if(res.status===200 || res.status===201){
-  alert("Doctor signup done");
-  navigate("/");
-  }
-else{
-    alert("Signup failed");
-}
-} catch (error) {
-  console.log("Doctor Signup error, Error:",error);
-}
-setIsLoading(false);
-}
+    const handleDoctorSignin = async () => {
+        setIsLoading(true);
+        if (!data.email || !data.phone || !data.password || !data.fullName || !data.address || !data.speciality) {
+            alert("all fields are required");
+        }
+        try {
+            const res = await api("post", "auth/signup/doctor", {
+                name: data.fullName,
+                email: data.email,
+                phone: data.phone,
+                password: data.password,
+                address: data.address,
+                speciality: data.speciality,
+                hospital_id: data.hospital_id
+            })
+            if (res.status === 200 || res.status === 201) {
+                alert("Doctor signup done");
+                navigate("/");
+            }
+            else {
+                alert("Signup failed");
+            }
+        } catch (error) {
+            console.log("Doctor Signup error, Error:", error);
+        }
+        setIsLoading(false);
+    }
 
-const handleHospitalSignin=async()=>{
-    setIsLoading(true);
-if(!data.email || !data.phone ||!data.password ||!data.fullName || !data.address){
-alert("all fields are required");
-}
-try {
-  const res=await api("post","auth/signup/hospital",{
-    name:data.fullName,
-    email:data.email,
-    phone:data.phone,
-    password:data.password,
-    address:data.address
-  })
-  if(res.status===200 || res.status===201){
-  alert("Hospital signup done");
-  navigate("/");
-  }
-else{
-    alert("Signup failed");
-}
-} catch (error) {
-  console.log("Hospital Signup error, Error:",error);
-}
-setIsLoading(false);
-}
+    const handleHospitalSignin = async () => {
+        setIsLoading(true);
+        if (!data.email || !data.phone || !data.password || !data.fullName || !data.address) {
+            alert("all fields are required");
+        }
+        try {
+            const res = await api("post", "auth/signup/hospital", {
+                name: data.fullName,
+                email: data.email,
+                phone: data.phone,
+                password: data.password,
+                address: data.address
+            })
+            if (res.status === 200 || res.status === 201) {
+                alert("Hospital signup done");
+                navigate("/");
+            }
+            else {
+                alert("Signup failed");
+            }
+        } catch (error) {
+            console.log("Hospital Signup error, Error:", error);
+        }
+        setIsLoading(false);
+    }
 
-const handleStaffSignin=async()=>{
-    setIsLoading(true);
-if(!data.email || !data.phone ||!data.password ||!data.fullName || !data.address){
-alert("all fields are required");
-}
-try {
-  const res=await api("post","auth/signup/hospital-staff",{
-    name:data.fullName,
-    email:data.email,
-    phone:data.phone,
-    password:data.password,
-    address:data.address,
-    hospital_id:data.hospital_id
-  })
-  if(res.status===200 || res.status===201){
-  alert("Staff signup done");
-  navigate("/");
-  }
-else{
-    alert("Signup failed");
-}
-} catch (error) {
-  console.log("Staff Signup error, Error:",error);
-}
-setIsLoading(false);
-}
+    const handleStaffSignin = async () => {
+        setIsLoading(true);
+        if (!data.email || !data.phone || !data.password || !data.fullName || !data.address) {
+            alert("all fields are required");
+        }
+        try {
+            const res = await api("post", "auth/signup/hospital-staff", {
+                name: data.fullName,
+                email: data.email,
+                phone: data.phone,
+                password: data.password,
+                address: data.address,
+                hospital_id: data.hospital_id
+            })
+            if (res.status === 200 || res.status === 201) {
+                alert("Staff signup done");
+                navigate("/");
+            }
+            else {
+                alert("Signup failed");
+            }
+        } catch (error) {
+            console.log("Staff Signup error, Error:", error);
+        }
+        setIsLoading(false);
+    }
     const validatePassword = (pass) => {
         return {
             length: pass.length >= 6,
@@ -257,9 +256,13 @@ setIsLoading(false);
 
             {step === 1 && (
                 <>
-                    <h2 className="text-3xl font-black text-slate-900 dark:text-white text-center mb-8">Choose your profile</h2>
+                    <div className="text-center mb-8">
+                        <h2 className="text-3xl font-black text-slate-900 dark:text-white">Choose your profile</h2>
+                        <p className="text-slate-400 dark:text-slate-500 font-medium mt-2">
+                            Select how you will be using the platform
+                        </p>
+                    </div>
                     <div className="space-y-8">
-                        <SocialAuth type="role selection" />
                         <div className="grid grid-cols-2 gap-4">
                             {[
                                 { id: 'patient', l: 'Patient', i: <User />, c: 'text-blue-600 bg-blue-50' },
@@ -438,7 +441,7 @@ setIsLoading(false);
                         {/* <button onClick={sendotp}disabled={!isPasswordValid || !isEmailValid || isLoading} className={buttonPrimary + " flex-[2]"}>
                             {isLoading ? <Loader2 className="animate-spin" /> : "Verify Email"}
                         </button> */}
-                         <button onClick={handleSingup}  className={buttonPrimary + " flex-[2]"}>
+                        <button onClick={handleSingup} className={buttonPrimary + " flex-[2]"}>
                             {isLoading ? <Loader2 className="animate-spin" /> : "Signup"}
                         </button>
                     </div>
@@ -468,7 +471,7 @@ setIsLoading(false);
 
                     <div className="space-y-4">
                         <button className={buttonPrimary + " w-full py-4 text-lg"}>Verify & Create Account</button>
-                        <button type="button" onClick={()=>setStep(3)} className="text-[10px] font-black uppercase tracking-widest text-blue-600 hover:underline">Entered wrong email?</button>
+                        <button type="button" onClick={() => setStep(3)} className="text-[10px] font-black uppercase tracking-widest text-blue-600 hover:underline">Entered wrong email?</button>
                     </div>
                     <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-widest mt-8">Note: Use code '123456' for this demo</p>
                 </form>

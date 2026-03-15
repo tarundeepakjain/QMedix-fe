@@ -88,7 +88,7 @@ const Navbar = ({ user, onLogout, darkMode, setDarkMode }) => {
                   border border-slate-200 dark:border-slate-700"
                 >
                   {darkMode ? "☀️ Light" : "🌙 Dark"}
-                </button>
+                </button>           
               </div>
             ) : (
               <div className="flex items-center space-x-6 border-l pl-6 border-slate-100 dark:border-slate-800">
