@@ -15,9 +15,9 @@ const PatientHeader = ({ user, activeCount, isDark, toggleTheme, onLogout }) => 
       </div>
 
       <div className="flex items-center space-x-4">
-        <button onClick={toggleTheme} className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-blue-600 transition-all">
+        {/* <button onClick={toggleTheme} className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-blue-600 transition-all">
           {isDark ? <Sun size={20} /> : <Moon size={20} />}
-        </button>
+        </button> */}
 
         {user ? (
           <div className="flex items-center space-x-4 border-l pl-4 border-slate-100 dark:border-slate-800 group relative">
