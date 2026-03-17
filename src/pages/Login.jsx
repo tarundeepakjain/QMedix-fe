@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Mail, Eye, EyeOff, Loader2, KeyRound, Phone, User } from "lucide-react";
-import SocialAuth from "../components/SocialAuth";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import api from "../services/apiWrapper";
@@ -62,18 +61,6 @@ export default function Login({ onLogin }) {
       <div className="text-center mb-10">
         <h2 className="text-3xl font-black tracking-tight text-slate-900 dark:text-white">Welcome Back</h2>
         <p className="text-slate-400 dark:text-slate-400 font-medium mt-2">Access your medical dashboard</p>
-      </div>
-
-      {/* Social Login */}
-      <div className="mb-8">
-        <SocialAuth type="login" />
-      </div>
-
-      <div className="flex items-center my-8">
-        <div className="flex-1 h-px bg-slate-200 dark:bg-slate-700"></div>
-
-        <span className="px-4 text-[10px] uppercase tracking-widest text-slate-400 font-bold">or continue with email</span>
-        <div className="flex-1 h-px bg-slate-200 dark:bg-slate-700"></div>
       </div>
 
       {/* Form */}
