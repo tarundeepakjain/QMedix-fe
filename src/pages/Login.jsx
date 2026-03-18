@@ -16,7 +16,7 @@ const inputStyle =
 const buttonPrimary =
   "flex items-center justify-center bg-blue-600 text-white py-3 px-6 rounded-xl font-bold hover:bg-blue-700 active:scale-[0.98] transition-all shadow-lg shadow-blue-500/20 disabled:opacity-50";
 
-export default function Login() {
+export default function Login({onLogin}) {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const roles = [
@@ -25,6 +25,7 @@ export default function Login() {
     { id: "doctor", name: "Doctor" },
     { id: "hospital-staff", name: "Staff" }
   ]
+  const navigate=useNavigate();
   const [role, setRole] = useState("");
   const handleLogin = async (email, password) => {
     if (!email || !password || !role) {
@@ -43,7 +44,7 @@ export default function Login() {
         // Pass a user object so App.jsx knows exactly who logged in.
         // (If your backend sends user data in res.data, use that instead!)
         onLogin({ email: email, role: role });
-
+      //  navigate("/")
       } else {
         alert("Login failed");
       }

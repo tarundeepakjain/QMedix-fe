@@ -39,21 +39,21 @@ export default function App() {
   useEffect(() => {
     fetchUser();
   }, []);
-  // const handleRegister = (newUser) => {
-  //   setUsersDb([...usersDb, newUser]);
-  //   alert("Registration successful! Please login with your new account.");
-  //   navigate('/login');
-  // };
+  const handleRegister = (newUser) => {
+    setUser([...usersDb, newUser]);
+    alert("Registration successful!");
+    navigate('/');
+  };
 
-  // const handleLogin = (userObj) => {
-  //   setUser(userObj);
+  const handleLogin = (userObj) => {
+    setUser(userObj);
 
-  //   if (userObj.role === 'hospital-staff') {
-  //     navigate('/staff/dashboard');
-  //   } else {
-  //     navigate(`/${userObj.role}/dashboard`);
-  //   }
-  // };
+    if (userObj.role === 'hospital-staff') {
+      navigate('/staff/dashboard');
+    } else {
+      navigate(`/${userObj.role}/dashboard`);
+    }
+  };
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
@@ -83,7 +83,9 @@ export default function App() {
       localStorage.setItem("theme", "light");
     }
   }, [darkMode]);
+const onLogin=()=>{
 
+}
   return (
     <div className="min-h-screen font-sans transition-colors duration-500 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 w-full max-w-[100vw] overflow-x-hidden">
       <Navbar
@@ -99,8 +101,8 @@ export default function App() {
       <Routes>
         {/* PUBLIC ROUTES */}
         <Route path="/" element={<Home user={user} loading={loading} />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
+        <Route path="/login" element={<Login onLogin={handleLogin}/>} />
+        <Route path="/signup" element={<Signup onRegister={handleRegister} />} />
 
         {/* PROTECTED ROUTES */}
         <Route
