@@ -1,34 +1,36 @@
 import React, { useState } from "react";
-import { Activity, LogOut, Menu, X } from "lucide-react";
+// Merged your imports with the Bell and UserRound icons!
+import { Activity, LogOut, Menu, X, Bell, UserRound } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/apiWrapper";
+
 const buttonPrimary =
   "flex items-center justify-center bg-blue-600 text-white py-3 px-6 rounded-xl font-bold hover:bg-blue-700 active:scale-[0.98] transition-all shadow-lg shadow-blue-500/20 disabled:opacity-50";
 
 const Navbar = ({ user, onLogout, darkMode, setDarkMode }) => {
   const navigate = useNavigate();
-  // State to control the mobile menu
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  //  setInterval=()=>{
-
-  //  }
 
   const handleNav = (path) => {
     navigate(path);
     setIsMenuOpen(false);
   };
-const handleLogout=async()=>{
-  try {
-    const res=await api("post","auth/logout");
 
-    if(res.status===200) {
-      alert("Logged out! Kindly login again to continue")
-      navigate("/");
+  // Your custom logout logic!
+  const handleLogout = async () => {
+    try {
+      const res = await api("post", "auth/logout");
+
+      if (res.status === 200) {
+        alert("Logged out! Kindly login again to continue");
+        navigate("/");
+        if (onLogout) onLogout(); // Just in case you still need to clear React state
+      }
+    } catch (error) {
+      console.error("Logout error:", error);
     }
-  } catch (error) {
-    console.error("Logout error:",error);
-  }
-}
+  };
+
   return (
     <>
       <nav
@@ -42,7 +44,6 @@ const handleLogout=async()=>{
           <div className="flex items-center space-x-12">
             <div
               className="flex items-center cursor-pointer group"
-              // FIXED: Changed oonClick to onClick
               onClick={() => handleNav(user ? "/dashboard" : "/")}
             >
               <div className="bg-gradient-to-br from-blue-600 to-indigo-600 p-2 rounded-xl transition-transform group-hover:rotate-6 shadow-lg shadow-blue-500/20">
@@ -55,24 +56,9 @@ const handleLogout=async()=>{
 
             {/* Desktop Links */}
             <div className="hidden md:flex items-center space-x-8">
-              <button
-                onClick={() => handleNav(user ? "/dashboard" : "/")}
-                className="font-black text-sm uppercase tracking-widest transition-colors text-slate-900 dark:text-slate-100 hover:text-blue-600"
-              >
-                Home
-              </button>
-              <button
-                onClick={() => handleNav(user ? "/dashboard" : "/")}
-                className="font-black text-sm uppercase tracking-widest transition-colors text-slate-400 dark:text-slate-500 hover:text-blue-600"
-              >
-                Services
-              </button>
-              <button
-                onClick={() => handleNav(user ? "/dashboard" : "/")}
-                className="font-black text-sm uppercase tracking-widest transition-colors text-slate-400 dark:text-slate-500 hover:text-blue-600"
-              >
-                Network
-              </button>
+              <button onClick={() => handleNav(user ? "/dashboard" : "/")} className="font-black text-sm uppercase tracking-widest transition-colors text-slate-900 dark:text-slate-100 hover:text-blue-600">Home</button>
+              <button onClick={() => handleNav(user ? "/dashboard" : "/")} className="font-black text-sm uppercase tracking-widest transition-colors text-slate-400 dark:text-slate-500 hover:text-blue-600">Services</button>
+              <button onClick={() => handleNav(user ? "/dashboard" : "/")} className="font-black text-sm uppercase tracking-widest transition-colors text-slate-400 dark:text-slate-500 hover:text-blue-600">Network</button>
             </div>
           </div>
 
@@ -80,81 +66,65 @@ const handleLogout=async()=>{
           <div className="hidden md:flex items-center space-x-6">
             {!user ? (
               <div className="flex items-center space-x-3">
-                <button
-                  onClick={() => handleNav("/login")}
-                  className="font-bold px-4 transition-colors text-slate-600 dark:text-slate-300 hover:text-blue-600"
-                >
-                  Login
-                </button>
-
-                <button
-                  onClick={() => handleNav("/signup")}
-                  className={buttonPrimary + " !py-2.5 !px-5"}
-                >
-                  Sign Up
-                </button>
-
-                <button
-                  onClick={() => setDarkMode(!darkMode)}
-                  className="ml-4 px-3 py-2 rounded-lg transition-colors
-                  bg-slate-100 dark:bg-slate-800
-                  text-slate-700 dark:text-slate-200
-                  border border-slate-200 dark:border-slate-700"
-                >
+                <button onClick={() => handleNav("/login")} className="font-bold px-4 transition-colors text-slate-600 dark:text-slate-300 hover:text-blue-600">Login</button>
+                <button onClick={() => handleNav("/signup")} className={buttonPrimary + " !py-2.5 !px-5"}>Sign Up</button>
+                <button onClick={() => setDarkMode(!darkMode)} className="ml-4 px-3 py-2 rounded-lg transition-colors bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700">
                   {darkMode ? "☀️ Light" : "🌙 Dark"}
                 </button>           
               </div>
             ) : (
-              <div className="flex items-center space-x-6 border-l pl-6 border-slate-100 dark:border-slate-800">
-                <div className="text-right">
-                  <p className="text-sm font-black leading-none text-slate-900 dark:text-white">
-                    {user.name || "User"}
-                  </p>
-                  <p className="text-[9px] text-blue-500 dark:text-blue-400 font-black uppercase tracking-widest mt-1">
-                    {user.role}
-                  </p>
+              <div className="flex items-center space-x-5 border-l pl-6 border-slate-100 dark:border-slate-800">
+                
+                {/* THE BELL ICON */}
+                <button className="relative p-2 text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                  <Bell size={22} />
+                  <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-slate-900"></span>
+                </button>
+
+                {/* THE USER PROFILE & FACE ICON */}
+                <div className="flex items-center gap-3 border border-slate-100 dark:border-slate-800/50 p-1.5 rounded-full bg-slate-50/50 dark:bg-slate-800/30">
+                  <div className="bg-slate-200 dark:bg-slate-800 p-2.5 rounded-full text-slate-500 dark:text-slate-400 border border-white dark:border-slate-700 shadow-inner">
+                    <UserRound size={18} />
+                  </div>
+                  <div className="text-right pr-2">
+                    <p className="text-sm font-black leading-none text-slate-900 dark:text-white">
+                      {user.name || "User"}
+                    </p>
+                    <p className="text-[9px] text-blue-500 dark:text-blue-400 font-black uppercase tracking-widest mt-1">
+                      {user.role}
+                    </p>
+                  </div>
                 </div>
 
-                {/* FIXED: Added Dark Mode toggle for logged-in users too! */}
-                <button
-                  onClick={() => setDarkMode(!darkMode)}
-                  className="px-3 py-2 rounded-lg transition-colors
-                  bg-slate-100 dark:bg-slate-800
-                  text-slate-700 dark:text-slate-200
-                  border border-slate-200 dark:border-slate-700"
-                >
+                <button onClick={() => setDarkMode(!darkMode)} className="px-3 py-2 rounded-lg transition-colors bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700">
                   {darkMode ? "☀️" : "🌙"}
                 </button>
-              {user &&
+
+                {/* YOUR NEW LOGOUT FUNCTION WIRED UP */}
                 <button
-                  onClick={() => {
-                    handleLogout();
-                    handleNav("/");
-                  }}
-                  className="p-2 rounded-lg transition-all
-                  bg-slate-100 dark:bg-slate-800
-                  text-slate-500 dark:text-slate-400
-                  hover:bg-red-500 hover:text-white"
+                  onClick={handleLogout}
+                  className="p-2 rounded-lg transition-all bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-red-500 hover:text-white"
                 >
                   <LogOut size={18} />
                 </button>
-}
               </div>
             )}
           </div>
 
-          {/* MOBILE TOGGLE BUTTON */}
-          <div className="md:hidden flex items-center space-x-4">
-            <button
-              onClick={() => setDarkMode(!darkMode)}
-              className="px-3 py-2 rounded-lg transition-colors bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700"
-            >
+          {/* MOBILE TOGGLE BUTTONS */}
+          <div className="md:hidden flex items-center space-x-3">
+            {/* MOBILE BELL ICON */}
+            {user && (
+              <button className="relative p-2 text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                <Bell size={22} />
+                <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-slate-900"></span>
+              </button>
+            )}
+            
+            <button onClick={() => setDarkMode(!darkMode)} className="px-3 py-2 rounded-lg transition-colors bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700">
               {darkMode ? "☀️" : "🌙"}
             </button>
-            <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="p-2 text-slate-900 dark:text-white"
-            >
+            <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="p-2 text-slate-900 dark:text-white">
               {isMenuOpen ? <X size={28} /> : <Menu size={28} />}
             </button>
           </div>
@@ -176,13 +146,18 @@ const handleLogout=async()=>{
               </div>
             ) : (
               <div className="flex flex-col space-y-4">
-                <div className="flex items-center space-x-3 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-100 dark:border-slate-800">
+                {/* MOBILE USER FACE ICON */}
+                <div className="flex items-center gap-3 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-100 dark:border-slate-800">
+                  <div className="bg-slate-200 dark:bg-slate-800 p-2.5 rounded-full text-slate-500 dark:text-slate-400 border border-white dark:border-slate-700 shadow-inner">
+                    <UserRound size={20} />
+                  </div>
                   <div>
                     <p className="text-sm font-black leading-none text-slate-900 dark:text-white">{user.name || "User"}</p>
                     <p className="text-[9px] text-blue-500 dark:text-blue-400 font-black uppercase tracking-widest mt-1">{user.role}</p>
                   </div>
                 </div>
-                <button onClick={() => { onLogout(); handleNav("/"); }} className="font-bold text-center py-3 bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400 rounded-xl flex items-center justify-center">
+                {/* MOBILE LOGOUT WIRED UP */}
+                <button onClick={handleLogout} className="font-bold text-center py-3 bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400 rounded-xl flex items-center justify-center">
                   <LogOut size={18} className="mr-2" /> Logout
                 </button>
               </div>
