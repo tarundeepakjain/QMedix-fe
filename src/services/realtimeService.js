@@ -4,7 +4,7 @@ import queueEngine from "./queueEngine.js";
 export const createAppointmentChannel = ({filter,onEvent})=>{
     const channel = supabase
     .channel("appointments-realtime")
-    on(
+    .on(
         "postgres_changes",
         {
             event:"*",
