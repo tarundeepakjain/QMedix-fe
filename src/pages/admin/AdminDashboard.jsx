@@ -1,68 +1,100 @@
-import { ShieldCheck, Users, Hospital, Activity } from "lucide-react";
+import React, { useState } from 'react';
+import AdminHeader from '../../components/admin/AdminHeader';
+import PendingApprovals from '../../components/admin/PendingApprovals';
+import DepartmentQueues from '../../components/admin/DepartmentQueues';
+import StaffDirectory from '../../components/admin/StaffDirectory';
 
-const cardStyle =
-  "p-8 rounded-3xl border shadow-sm transition-all bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-700 hover:border-blue-200 dark:hover:border-blue-500";
+export default function AdminDashboard() {
+  
+  // --- MOCK STATE ---
+  
+  const [stats, setStats] = useState({
+    total: 342,
+    completed: 215,
+    waiting: 127,
+    pendingUsers: 3
+  });
 
-const AdminDashboard = () => {
+  const [pendingUsers, setPendingUsers] = useState([
+    { id: 1, name: 'Dr. Alan Grant', email: 'agrant@qmedix.com', role: 'Doctor', dept: 'Orthopedics' },
+    { id: 2, name: 'Claire Dearing', email: 'cdearing@qmedix.com', role: 'Staff', dept: 'Front Desk' },
+    { id: 3, name: 'Dr. Ellie Sattler', email: 'esattler@qmedix.com', role: 'Doctor', dept: 'Pediatrics' }
+  ]);
+
+  const [directory, setDirectory] = useState([
+    { id: 101, name: 'Dr. Robert Smith', role: 'Doctor', dept: 'Cardiology', status: 'Active' },
+    { id: 102, name: 'Dr. Sarah Jenkins', role: 'Doctor', dept: 'Pediatrics', status: 'Active' },
+    { id: 103, name: 'Mark Johnson', role: 'Staff', dept: 'Front Desk', status: 'Offline' },
+    { id: 104, name: 'Dr. Emily Chen', role: 'Doctor', dept: 'Neurology', status: 'Active' },
+    { id: 105, name: 'Amanda Clarke', role: 'Staff', dept: 'Billing', status: 'Active' },
+    { id: 106, name: 'James Wilson', role: 'Staff', dept: 'Front Desk', status: 'Active' },
+  ]);
+
+  const departmentsData = [
+    {
+      name: 'Cardiology',
+      doctors: [
+        { name: 'Dr. Robert Smith', status: 'Available', current: 'Q-42', waiting: 4 },
+        { name: 'Dr. James Wilson', status: 'On Break', current: null, waiting: 7 }
+      ]
+    },
+    {
+      name: 'Pediatrics',
+      doctors: [
+        { name: 'Dr. Sarah Jenkins', status: 'Available', current: 'P-12', waiting: 2 }
+      ]
+    },
+    {
+      name: 'Neurology',
+      doctors: [
+        { name: 'Dr. Emily Chen', status: 'Available', current: 'N-08', waiting: 0 },
+        { name: 'Dr. Lisa Cuddy', status: 'Available', current: 'N-09', waiting: 1 }
+      ]
+    }
+  ];
+
+  // --- ACTIONS ---
+
+  const handleApprove = (id) => {
+    const userToApprove = pendingUsers.find(u => u.id === id);
+    if(userToApprove) {
+      // Move them to the directory
+      setDirectory([...directory, { ...userToApprove, status: 'Active', id: Date.now() }]);
+      // Remove from pending
+      setPendingUsers(pendingUsers.filter(u => u.id !== id));
+      // Update Stats
+      setStats(prev => ({ ...prev, pendingUsers: prev.pendingUsers - 1 }));
+      alert(`Approved ${userToApprove.name}`);
+    }
+  };
+
+  const handleReject = (id) => {
+    setPendingUsers(pendingUsers.filter(u => u.id !== id));
+    setStats(prev => ({ ...prev, pendingUsers: prev.pendingUsers - 1 }));
+  };
+
+
   return (
-    <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#0B0F19] p-4 sm:p-6 lg:p-8 w-full max-w-[100vw] overflow-x-hidden transition-colors duration-500">
+      <div className="max-w-7xl mx-auto space-y-10">
+        
+        <AdminHeader stats={stats} />
 
-      {/* HERO */}
-      <div className="bg-gradient-to-r from-indigo-900 to-slate-900 rounded-[2rem] p-8 text-white flex justify-between items-center overflow-hidden relative shadow-2xl">
-        <div className="relative z-10">
-          <p className="text-indigo-300 font-black uppercase text-[10px] tracking-widest mb-2">
-            Admin Control Panel
-          </p>
-          <h2 className="text-4xl font-black">Hospital Administration</h2>
-          <p className="text-slate-400 text-sm mt-3 max-w-md">
-            Monitor system activity, manage staff, and oversee hospital operations from one place.
-          </p>
-        </div>
-        <ShieldCheck className="absolute right-[-5%] opacity-10 w-48 h-48" />
-      </div>
-
-      {/* ACTION CARDS */}
-      <div className="grid md:grid-cols-3 gap-6">
-
-        <div className={cardStyle}>
-          <div className="w-12 h-12 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center mb-6">
-            <Users />
-          </div>
-          <h3 className="text-xl font-black text-slate-900 dark:text-white">
-            Manage Staff
-          </h3>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mt-2">
-            Add, remove, or update doctors, receptionists, and support staff.
-          </p>
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-10">
+          <PendingApprovals 
+            pendingUsers={pendingUsers} 
+            onApprove={handleApprove} 
+            onReject={handleReject} 
+          />
+          
+          <StaffDirectory directory={directory} />
         </div>
 
-        <div className={cardStyle}>
-          <div className="w-12 h-12 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-xl flex items-center justify-center mb-6">
-            <Hospital />
-          </div>
-          <h3 className="text-xl font-black text-slate-900 dark:text-white">
-            Hospital Settings
-          </h3>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mt-2">
-            Configure departments, service timings, and facility information.
-          </p>
-        </div>
-
-        <div className={cardStyle}>
-          <div className="w-12 h-12 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-xl flex items-center justify-center mb-6">
-            <Activity />
-          </div>
-          <h3 className="text-xl font-black text-slate-900 dark:text-white">
-            System Activity
-          </h3>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mt-2">
-            Track patient flow, queue load, and real-time hospital performance.
-          </p>
+        <div className="pt-4 border-t border-slate-200 dark:border-slate-800">
+          <DepartmentQueues departments={departmentsData} />
         </div>
 
       </div>
     </div>
   );
-};
-
-export default AdminDashboard;
+}
