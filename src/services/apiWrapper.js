@@ -41,6 +41,7 @@ const api = async (method, url, data=null) => {
     return res;
 
   } catch (error) {
+    
     console.error(`error in ${url}:`, error?.response?.data || error.message);
     throw error;
   }

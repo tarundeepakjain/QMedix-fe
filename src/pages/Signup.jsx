@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState,useRef } from "react";
 import {
     User,
     Stethoscope,
@@ -11,6 +11,7 @@ import {
     Loader2
 } from "lucide-react";
 import api from "../services/apiWrapper";
+import { useHospitals } from "../data/hospitals";
 const labelStyle =
     "block text-[10px] font-black text-blue-600/70 dark:text-blue-400/70 uppercase mb-2 tracking-widest ml-1";
 
@@ -37,13 +38,34 @@ const Signup = ({onRegister}) => {
         speciality: '',
         dept: '',
         nop: '',
+        city:'',
         doctors_available: '',
         hospital_id: ''
     });
     const [otp, setOtp] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-
+    const [hospitals,setHospitals]=useState([]);
+    const isFirstRender = useRef(true);
     // Email Regex Validation
+    const fetchHospitals=async()=>{
+        try {
+            const res=await api("get","hospital/all");
+            console.log(res.data.hospitals);
+            setHospitals(res.data.hospitals);
+        } catch (error) {
+            console.error("Error loading hospitals");
+        }
+    }
+    useEffect(()=>{
+        if(isFirstRender.current){
+            isFirstRender.current=false;
+            return;
+        }
+        if(role==="doctor" || role==="staff"){
+                fetchHospitals();
+        }
+    
+    },[role]);
     const validateEmail = (email) => {
         return String(email)
             .toLowerCase()
@@ -100,7 +122,7 @@ const Signup = ({onRegister}) => {
         else {
             handleHospitalSignin();
         }
-        setStep(3);
+   
     }
     const handlePatientSignin = async () => {
         setIsLoading(true);
@@ -243,11 +265,6 @@ const Signup = ({onRegister}) => {
         }
     };
 
-    const hospitals = [
-        { id: "h1", name: "City Hospital" },
-        { id: "h2", name: "Green Valley Clinic" },
-        { id: "h3", name: "Sunrise Medical Center" }
-    ];
 
     return (
         <div className="max-w-xl mx-auto mt-12 p-10 rounded-[2.5rem] shadow-2xl transition-colors bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl

@@ -13,6 +13,7 @@ import ReceptionDashboard from "./pages/reception/ReceptionDashboard";
 import BookAppointment from "./pages/patient/BookAppointment";
 import { AuthProvider } from './context/authContext';
 import { supabase } from "./services/supabaseClient";
+import FAQ from './pages/FAQ';
 import api from './services/apiWrapper';
 import Loading from './components/Loader';
 export default function App() {
@@ -28,7 +29,7 @@ export default function App() {
   const fetchUser = async () => {
     try {
       const res = await api("get", "auth/me");
-      // console.log(res.data);
+      console.log(res.data);
       setUser(res.data.user.profile);
       // console.log(user);
     } catch(error) {
@@ -111,13 +112,13 @@ if(loading) return <Loading />
         <Route path="/doctor/dashboard" element={<DoctorDashboard user={user} />} />
         <Route path="/hospital/dashboard" element={<AdminDashboard user={user} />} />
         <Route path="/staff/dashboard" element={<ReceptionDashboard user={user} />} />
-
+         <Route path="/FAQ" element={<FAQ/>} />
         {/* PROTECTED ROUTES */}
         <Route
           path="/patient/dashboard"
           element={user? <PatientDashboard user={user} isDark={darkMode} toggleTheme={() => setDarkMode(!darkMode)} />: <Navigate to="/login" replace />}
         />
-        <Route
+        {/* <Route
           path="/doctor/dashboard"
           element={user ? <DoctorDashboard user={user} /> : <Navigate to="/login" replace />}
         />
@@ -128,7 +129,7 @@ if(loading) return <Loading />
         <Route
           path="/staff/dashboard"
           element={user ? <ReceptionDashboard user={user} /> : <Navigate to="/login" replace />}
-        />
+        /> */}
         <Route
           path="/patient/book"
           element={user ? <BookAppointment user={user} /> : <Navigate to="/login" replace />}

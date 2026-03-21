@@ -44,7 +44,7 @@ const Navbar = ({ user, onLogout, darkMode, setDarkMode }) => {
           <div className="flex items-center space-x-12">
             <div
               className="flex items-center cursor-pointer group"
-              onClick={() => handleNav(user ? "/dashboard" : "/")}
+              onClick={() => handleNav("/")}
             >
               <div className="bg-gradient-to-br from-blue-600 to-indigo-600 p-2 rounded-xl transition-transform group-hover:rotate-6 shadow-lg shadow-blue-500/20">
                 <Activity className="h-5 w-5 text-white" />
@@ -56,11 +56,27 @@ const Navbar = ({ user, onLogout, darkMode, setDarkMode }) => {
 
             {/* Desktop Links */}
             <div className="hidden md:flex items-center space-x-8">
-              <button onClick={() => handleNav(user ? "/dashboard" : "/")} className="font-black text-sm uppercase tracking-widest transition-colors text-slate-900 dark:text-slate-100 hover:text-blue-600">Home</button>
-              <button onClick={() => handleNav(user ? "/dashboard" : "/")} className="font-black text-sm uppercase tracking-widest transition-colors text-slate-400 dark:text-slate-500 hover:text-blue-600">Services</button>
-              <button onClick={() => handleNav(user ? "/dashboard" : "/")} className="font-black text-sm uppercase tracking-widest transition-colors text-slate-400 dark:text-slate-500 hover:text-blue-600">Network</button>
+              <button onClick={() => handleNav(user ? "/" : "/")} className="font-black text-sm uppercase tracking-widest transition-colors text-slate-900 dark:text-slate-100 hover:text-blue-600">Home</button>
+              <button onClick={() => handleNav(user ? `/${user?.role}/dashboard` : "/")} className="font-black text-sm uppercase tracking-widest transition-colors text-slate-400 dark:text-slate-500 hover:text-blue-600">DASHBOARD</button>
+              <button onClick={() => handleNav("/FAQ")} className="font-black text-sm uppercase tracking-widest transition-colors text-slate-400 dark:text-slate-500 hover:text-blue-600">FAQ</button>
             </div>
           </div>
+           {user?.role === "doctor" && user?.status==="PENDING" && (
+            <>
+  <p onClick={()=>{
+     navigate("/FAQ", {
+      state: {
+        role: "doctor",
+        openQuestion: "approval"
+      }
+    });
+  }} className="text-[12px] text-amber-500 font-black uppercase tracking-widest mt-1 cursor-pointer hover:underline">
+    Approval from hospital is pending!! <br></br>
+    Click here to know more
+  </p>
+  </>
+
+)}
 
           {/* RIGHT SIDE (Desktop Only) */}
           <div className="hidden md:flex items-center space-x-6">
@@ -93,6 +109,7 @@ const Navbar = ({ user, onLogout, darkMode, setDarkMode }) => {
                     <p className="text-[9px] text-blue-500 dark:text-blue-400 font-black uppercase tracking-widest mt-1">
                       {user.role}
                     </p>
+                   
                   </div>
                 </div>
 
