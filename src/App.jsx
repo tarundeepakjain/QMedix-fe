@@ -14,6 +14,7 @@ import BookAppointment from "./pages/patient/BookAppointment";
 import { AuthProvider } from './context/authContext';
 import { supabase } from "./services/supabaseClient";
 import api from './services/apiWrapper';
+import Loading from './components/Loader';
 export default function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -27,8 +28,9 @@ export default function App() {
   const fetchUser = async () => {
     try {
       const res = await api("get", "auth/me");
-      console.log(res.data);
+      // console.log(res.data);
       setUser(res.data.user.profile);
+      // console.log(user);
     } catch(error) {
       setUser(null);
       console.error(error);
@@ -39,6 +41,7 @@ export default function App() {
   useEffect(() => {
     fetchUser();
   }, []);
+ 
   const handleRegister = (newUser) => {
     setUser([...usersDb, newUser]);
     alert("Registration successful!");
@@ -54,25 +57,25 @@ export default function App() {
       navigate(`/${userObj.role}/dashboard`);
     }
   };
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        // Starting with patients only for Google Auth
-        setUser({ ...session.user, role: 'patient' });
-      }
-      setLoading(false);
-    });
+  // useEffect(() => {
+  //   supabase.auth.getSession().then(({ data: { session } }) => {
+  //     if (session) {
+  //       // Starting with patients only for Google Auth
+  //       setUser({ ...session.user, role: 'patient' });
+  //     }
+  //     setLoading(false);
+  //   });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session) {
-        setUser({ ...session.user, role: 'patient' });
-      } else {
-        setUser(null);
-      }
-    });
+  //   const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+  //     if (session) {
+  //       setUser({ ...session.user, role: 'patient' });
+  //     } else {
+  //       setUser(null);
+  //     }
+  //   });
 
-    return () => subscription.unsubscribe();
-  }, []);
+  //   return () => subscription.unsubscribe();
+  // }, []);
 
   useEffect(() => {
     if (darkMode) {
@@ -86,7 +89,9 @@ export default function App() {
 // const onLogin=()=>{
 
 // }
+if(loading) return <Loading />
   return (
+
     <div className="min-h-screen font-sans transition-colors duration-500 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 w-full max-w-[100vw] overflow-x-hidden">
       <Navbar
         user={user}
@@ -100,14 +105,14 @@ export default function App() {
 <AuthProvider>
       <Routes>
         {/* PUBLIC ROUTES */}
-        <Route path="/" element={<Home user={user} loading={loading} />} />
+        <Route path="/" element={<Home user={user}  />} />
         <Route path="/login" element={user ?<Navigate to="/" replace /> :<Login onLogin={handleLogin}/>} />
         <Route path="/signup" element={<Signup onRegister={handleRegister} />} />
 
         {/* PROTECTED ROUTES */}
         <Route
           path="/patient/dashboard"
-          element={<PatientDashboard  isDark={darkMode} toggleTheme={() => setDarkMode(!darkMode)} />}
+          element={user? <PatientDashboard user={user} isDark={darkMode} toggleTheme={() => setDarkMode(!darkMode)} />: <Navigate to="/login" replace />}
         />
         <Route
           path="/doctor/dashboard"

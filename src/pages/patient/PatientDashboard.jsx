@@ -41,7 +41,7 @@ function normalise(appointment) {
   };
 }
 
-export default function PatientDashboard({isDark}) {
+export default function PatientDashboard({user,sDark}) {
   const [liveData,    setLiveData]    = useState([]); // waiting / in_progress
   const [pendingData, setPendingData] = useState([]); // upcoming pending bookings
   const [historyData, setHistoryData] = useState([]); // past appointments (booked_for < now)
@@ -50,7 +50,7 @@ export default function PatientDashboard({isDark}) {
   const pollingRef  = useRef(null);
   const channelRef  = useRef(null);
   const navigate    = useNavigate();
-  const {user}=useAuth();
+  // const {user}=useAuth();
 // console.log(user);
   const fetchPatientAppointments = useCallback(async () => {
 

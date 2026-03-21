@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import api from "../services/apiWrapper";
-
+import Loading from "../components/Loader";
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
@@ -22,7 +22,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     fetchUser();
   }, []);
-
+if(loading) return <Loading />
   return (
     <AuthContext.Provider value={{ user, setUser, loading }}>
       {children}

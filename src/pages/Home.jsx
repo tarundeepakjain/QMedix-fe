@@ -39,9 +39,9 @@ const AnimatedCounter = ({ end, suffix = "", duration = 2000 }) => {
 };
 
 
-const Home = ({ user, loading }) => {
+const Home = ({ user }) => {
   const navigate = useNavigate();
-
+const loading=false;
   // scroll animation
   useEffect(() => {
     const observer = new IntersectionObserver(
