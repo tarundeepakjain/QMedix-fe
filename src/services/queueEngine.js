@@ -201,7 +201,6 @@ class QueueEngine {
   getPatientPosition(appointmentId) {
     return this.positions.get(appointmentId) || null;
   }
-
 }
 
 export default new QueueEngine();
