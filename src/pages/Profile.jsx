@@ -184,7 +184,7 @@ export default function Profile() {
           {/* RIGHT COL: EDITABLE FORM FIELDS */}
           <div className="lg:col-span-2 space-y-6">
             
-            {/* 1. GENERAL INFO (Matches top half of ALL screenshots) */}
+            {/* 1. GENERAL INFO */}
             <div className="bg-white dark:bg-[#111827] p-6 sm:p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-sm">
               <h3 className="text-lg font-black text-slate-900 dark:text-white uppercase tracking-widest mb-6 border-b border-slate-100 dark:border-slate-800 pb-4">General Information</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -203,11 +203,11 @@ export default function Profile() {
               </div>
             </div>
 
-            {/* 2. SPECIFIC INFO (Matches bottom half of screenshots exactly) */}
+            {/* 2. SPECIFIC INFO */}
             <div className="bg-white dark:bg-[#111827] p-6 sm:p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-sm">
               <h3 className="text-lg font-black text-slate-900 dark:text-white uppercase tracking-widest mb-6 border-b border-slate-100 dark:border-slate-800 pb-4 flex items-center gap-2">
-                {role === 'patient' ? <MapPin className="text-blue-500"/> : <Building2 className="text-amber-500" />} 
-                {role === 'patient' ? 'Location Details' : 'Professional Details'}
+                {role === 'patient' || role === 'admin' ? <MapPin className="text-blue-500"/> : <Building2 className="text-amber-500" />} 
+                {role === 'patient' || role === 'admin' ? 'Location Details' : 'Professional Details'}
               </h3>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -269,10 +269,6 @@ export default function Profile() {
                 {/* --- ADMIN / HOSPITAL --- */}
                 {role === 'admin' && (
                   <>
-                    <div className="sm:col-span-2">
-                      <label className={labelStyle}><ShieldCheck size={14} /> Hospital Name</label>
-                      <input type="text" value={formData.hospitalName} onChange={e => setFormData({...formData, hospitalName: e.target.value})} disabled={!isEditing} className={inputStyle} />
-                    </div>
                     <div className="sm:col-span-2">
                       <label className={labelStyle}><MapPin size={14} /> Hospital Address</label>
                       <input type="text" value={formData.address} onChange={e => setFormData({...formData, address: e.target.value})} disabled={!isEditing} className={inputStyle} />
