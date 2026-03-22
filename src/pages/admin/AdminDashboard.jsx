@@ -273,9 +273,7 @@ export default function AdminDashboard({ user }) {
     try {
       const payload = {
         total_patients: stats.total,
-        waiting:        stats.waiting,
-        completed:      stats.completed,
-        doctor_count:   stats.doctorCount,
+        total_doctors:   stats.doctorCount,
         pending_staff:  stats.pendingUsers,
       };
       await api('POST', 'hospital/save-opd', payload);
