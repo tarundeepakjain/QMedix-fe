@@ -5,6 +5,7 @@ import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import Profile from './pages/Profile';
 
 import PatientDashboard from "./pages/patient/PatientDashboard";
 import DoctorDashboard from "./pages/doctor/DoctorDashboard";
@@ -34,7 +35,7 @@ export default function App() {
       // console.log(user);
     } catch(error) {
       setUser(null);
-      console.error(error);
+      console.error("Auth fetch error:", error);
     }
     setLoading(false);
   };
@@ -42,7 +43,7 @@ export default function App() {
   useEffect(() => {
     fetchUser();
   }, []);
- 
+
   const handleRegister = (newUser) => {
     setUser([...usersDb, newUser]);
     alert("Registration successful!");
@@ -87,10 +88,10 @@ export default function App() {
       localStorage.setItem("theme", "light");
     }
   }, [darkMode]);
-// const onLogin=()=>{
+  // const onLogin=()=>{
 
-// }
-if(loading) return <Loading />
+  // }
+  if (loading) return <Loading />
   return (
 
     <div className="min-h-screen font-sans transition-colors duration-500 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 w-full max-w-[100vw] overflow-x-hidden">
@@ -103,38 +104,43 @@ if(loading) return <Loading />
         darkMode={darkMode}
         setDarkMode={setDarkMode}
       />
-<AuthProvider>
-      <Routes>
-        {/* PUBLIC ROUTES */}
-        <Route path="/" element={<Home user={user}  />} />
-        <Route path="/login" element={user ?<Navigate to="/" replace /> :<Login onLogin={handleLogin}/>} />
-        <Route path="/signup" element={<Signup onRegister={handleRegister} />} />
-        <Route path="/doctor/dashboard" element={<DoctorDashboard user={user} />} />
-        <Route path="/hospital/dashboard" element={<AdminDashboard user={user} />} />
-        <Route path="/staff/dashboard" element={<ReceptionDashboard user={user} />} />
-         <Route path="/FAQ" element={<FAQ/>} />
-        {/* PROTECTED ROUTES */}
-        <Route
-          path="/patient/dashboard"
-          element={user? <PatientDashboard user={user} isDark={darkMode} toggleTheme={() => setDarkMode(!darkMode)} />: <Navigate to="/login" replace />}
-        />
-        {/* <Route
-          path="/doctor/dashboard"
-          element={user ? <DoctorDashboard user={user} /> : <Navigate to="/login" replace />}
-        />
-        <Route
-          path="/hospital/dashboard"
-          element={user ? <AdminDashboard user={user} /> : <Navigate to="/login" replace />}
-        />
-        <Route
-          path="/staff/dashboard"
-          element={user ? <ReceptionDashboard user={user} /> : <Navigate to="/login" replace />}
-        /> */}
-        <Route
-          path="/patient/book"
-          element={user ? <BookAppointment user={user} /> : <Navigate to="/login" replace />}
-        />
-      </Routes>
+      <AuthProvider>
+        <Routes>
+          {/* PUBLIC ROUTES */}
+          <Route path="/" element={<Home user={user} />} />
+          <Route path="/login" element={user ? <Navigate to="/" replace /> : <Login onLogin={handleLogin} />} />
+          <Route path="/signup" element={<Signup onRegister={handleRegister} />} />
+          {/* <Route path="/doctor/dashboard" element={<DoctorDashboard user={user} />} />
+          <Route path="/hospital/dashboard" element={<AdminDashboard user={user} />} />
+          <Route path="/staff/dashboard" element={<ReceptionDashboard user={user} />} /> */}
+          <Route path="/FAQ" element={<FAQ />} />
+
+          {/* PROTECTED ROUTES */}
+          <Route
+            path="/patient/dashboard"
+            element={user ? <PatientDashboard user={user} isDark={darkMode} toggleTheme={() => setDarkMode(!darkMode)} /> : <Navigate to="/login" replace />}
+          />
+          <Route
+            path="/doctor/dashboard"
+            element={user ? <DoctorDashboard user={user} /> : <Navigate to="/login" replace />}
+          />
+          <Route
+            path="/hospital/dashboard"
+            element={user ? <AdminDashboard user={user} /> : <Navigate to="/login" replace />}
+          />
+          <Route
+            path="/staff/dashboard"
+            element={user ? <ReceptionDashboard user={user} /> : <Navigate to="/login" replace />}
+          />
+          <Route
+            path="/patient/book"
+            element={user ? <BookAppointment user={user} /> : <Navigate to="/login" replace />}
+          />
+          <Route
+            path="/profile"
+            element={user ? <Profile /> : <Navigate to="/login" replace />}
+          />
+        </Routes>
       </AuthProvider>
 
       <footer className="mt-20 py-16 bg-slate-50 dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 transition-colors">
