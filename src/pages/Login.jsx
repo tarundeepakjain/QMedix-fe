@@ -43,7 +43,7 @@ export default function Login({onLogin}) {
         // 2. INSTEAD OF NAVIGATING HERE, PASS THE DATA TO APP.JSX!
         // Pass a user object so App.jsx knows exactly who logged in.
         // (If your backend sends user data in res.data, use that instead!)
-        onLogin({ email: email, role: role });
+        onLogin();
       //  navigate("/")
       } else {
         alert("Login failed");

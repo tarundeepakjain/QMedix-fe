@@ -99,7 +99,7 @@ navigate("/");
     }`}>FAQ</button>
             </div>
           </div>
-           {user?.role === "doctor" && user?.profile.status==="PENDING" && (
+           {user?.role === "doctor" && user?.status==="PENDING" && (
             <>
               <p onClick={() => {
                 navigate("/FAQ", {
@@ -145,7 +145,7 @@ navigate("/");
                   </div>
                   <div className="text-right pr-2">
                     <p className="text-sm font-black leading-none text-slate-900 dark:text-white">
-                      {user.name || "User"}
+                      {user?.name || "User"}
                     </p>
                     <p className="text-[9px] text-blue-500 dark:text-blue-400 font-black uppercase tracking-widest mt-1">
                       {user?.role}

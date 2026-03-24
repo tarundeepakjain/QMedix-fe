@@ -5,6 +5,7 @@ export const useDoctors=(hospitalId)=>{
 const [doctorMap,setDoctorMap]=useState({});
 const fetch = async () => {
   try {
+    console.log("Hospital id:",hospitalId);
 
    const res=await api("get",`doctor/all/${hospitalId}`);
   //  console.log(res.data.doctors);
