@@ -12,8 +12,8 @@ const inputStyle =
 
 const labelStyle = "block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 ml-1 flex items-center gap-2";
 
-export default function Profile() {
-  const { user } = useAuth();
+export default function Profile({user}) {
+
   console.log("CURRENT LOGGED IN USER:", user);
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);

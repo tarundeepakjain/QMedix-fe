@@ -1,20 +1,22 @@
-import React, { useState } from "react";
-// Merged your imports with the Bell and UserRound icons!
+import React, { useEffect, useState } from "react";
 import { Activity, LogOut, Menu, X, Bell, UserRound } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate ,useLocation} from "react-router-dom";
 import api from "../services/apiWrapper";
-
+import CustomAlert from "./Alert";
 const buttonPrimary =
   "flex items-center justify-center bg-blue-600 text-white py-3 px-6 rounded-xl font-bold hover:bg-blue-700 active:scale-[0.98] transition-all shadow-lg shadow-blue-500/20 disabled:opacity-50";
 
 const Navbar = ({ user, onLogout, darkMode, setDarkMode }) => {
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
+  const [alert,setAlert]=useState(null);
+ const location=useLocation();
   const handleNav = (path) => {
     navigate(path);
     setIsMenuOpen(false);
   };
+
+
 
   // Your custom logout logic!
   const handleLogout = async () => {
@@ -22,8 +24,11 @@ const Navbar = ({ user, onLogout, darkMode, setDarkMode }) => {
       const res = await api("post", "auth/logout");
 
       if (res.status === 200) {
-        alert("Logged out! Kindly login again to continue");
-        navigate("/");
+        setAlert({
+  message: "Logged out! Kindly login again to continue",
+  type: "success"
+});
+navigate("/");
         if (onLogout) onLogout(); // Just in case you still need to clear React state
       }
     } catch (error) {
@@ -33,6 +38,16 @@ const Navbar = ({ user, onLogout, darkMode, setDarkMode }) => {
 
   return (
     <>
+    {alert && (
+  <>
+
+  <CustomAlert
+    message={alert.message}
+    type={alert.type}
+    onClose={() => setAlert(null)}
+  />
+  </>
+)}
       <nav
         className="sticky top-0 z-50 h-20 backdrop-blur-md border-b transition-colors
         bg-white/90 dark:bg-slate-900/80
@@ -56,12 +71,35 @@ const Navbar = ({ user, onLogout, darkMode, setDarkMode }) => {
 
             {/* Desktop Links */}
             <div className="hidden md:flex items-center space-x-8">
-              <button onClick={() => handleNav(user ? "/" : "/")} className="font-black text-sm uppercase tracking-widest transition-colors text-slate-900 dark:text-slate-100 hover:text-blue-600">Home</button>
-              <button onClick={() => handleNav(user ? `/${user?.role}/dashboard` : "/")} className="font-black text-sm uppercase tracking-widest transition-colors text-slate-400 dark:text-slate-500 hover:text-blue-600">DASHBOARD</button>
-              <button onClick={() => handleNav("/FAQ")} className="font-black text-sm uppercase tracking-widest transition-colors text-slate-400 dark:text-slate-500 hover:text-blue-600">FAQ</button>
+              <button onClick={() => handleNav(user ? "/" : "/")}   className={`font-black text-sm uppercase tracking-widest transition-colors 
+    ${
+      location.pathname === "/"
+        ? "text-blue-600 dark:text-blue-400"
+        : "text-slate-400 dark:text-slate-500 hover:text-blue-600"
+    }`}>Home</button>
+              <button
+  onClick={() =>{{!user && setAlert({
+    message:"Kindly login first",
+    type:"warning"
+  })} handleNav(user ? `/${user?.role}/dashboard` : "/")}}
+  className={`font-black text-sm uppercase tracking-widest transition-colors 
+    ${
+      location.pathname.includes("dashboard")
+        ? "text-blue-600 dark:text-blue-400"
+        : "text-slate-400 dark:text-slate-500 hover:text-blue-600"
+    }`}
+>
+  DASHBOARD
+</button>
+              <button onClick={() => handleNav("/FAQ")}  className={`font-black text-sm uppercase tracking-widest transition-colors 
+    ${
+      location.pathname === "/FAQ"
+        ? "text-blue-600 dark:text-blue-400"
+        : "text-slate-400 dark:text-slate-500 hover:text-blue-600"
+    }`}>FAQ</button>
             </div>
           </div>
-          {user?.role === "doctor" && user?.status === "PENDING" && (
+           {user?.role === "doctor" && user?.status==="PENDING" && (
             <>
               <p onClick={() => {
                 navigate("/FAQ", {
@@ -106,11 +144,11 @@ const Navbar = ({ user, onLogout, darkMode, setDarkMode }) => {
                     <UserRound size={18} />
                   </div>
                   <div className="text-right pr-2">
-                    <p className="text-sm font-black leading-none text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                      {user.name || "User"}
+                    <p className="text-sm font-black leading-none text-slate-900 dark:text-white">
+                      {user?.name || "User"}
                     </p>
                     <p className="text-[9px] text-blue-500 dark:text-blue-400 font-black uppercase tracking-widest mt-1">
-                      {user.role}
+                      {user?.role}
                     </p>
                   </div>
                 </button>

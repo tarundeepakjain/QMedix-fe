@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Activity } from 'lucide-react';
-import { Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
+import { Routes, Route, Navigate, useNavigate, useLocation, useFetcher } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
@@ -30,17 +30,11 @@ export default function App() {
   const fetchUser = async () => {
     try {
       const res = await api("get", "auth/me");
-      console.log("API Response Data:", res.data);
-
-      // Merge the profile data AND the role together!
-      if (res.data && res.data.user) {
-        setUser({
-          ...res.data.user.profile,
-          role: res.data.user.role
-        });
-      }
-
-    } catch (error) {
+      console.log(res.data);
+      setUser(res.data.user);
+    
+      // console.log(user);
+    } catch(error) {
       setUser(null);
       console.error("Auth fetch error:", error);
     }
@@ -57,13 +51,13 @@ export default function App() {
     navigate('/');
   };
 
-  const handleLogin = (userObj) => {
-    setUser(userObj);
-
-    if (userObj.role === 'hospital-staff') {
+  const handleLogin = async() => {
+const userFetched = await fetchUser();
+// console.log(userFetched)
+    if (userFetched.role === 'hospital-staff') {
       navigate('/staff/dashboard');
     } else {
-      navigate(`/${userObj.role}/dashboard`);
+      navigate(`/${userFetched.role}/dashboard`);
     }
   };
   // useEffect(() => {
@@ -145,7 +139,7 @@ export default function App() {
           />
           <Route
             path="/profile"
-            element={user ? <Profile /> : <Navigate to="/login" replace />}
+            element={user ? <Profile user={user} /> : <Navigate to="/login" replace />}
           />
         </Routes>
       </AuthProvider>
