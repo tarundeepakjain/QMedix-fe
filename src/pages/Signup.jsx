@@ -206,8 +206,10 @@ const Signup = ({onRegister}) => {
 
     const handleStaffSignin = async () => {
         setIsLoading(true);
-        if (!data.email || !data.phone || !data.password || !data.fullName || !data.address) {
+        console.log(data);
+        if (!data.email || !data.phone || !data.password || !data.fullName || !data.address || !data.speciality || !data.hospital_id) {
             alert("all fields are required");
+            return;
         }
         try {
             const res = await api("post", "auth/signup/hospital-staff", {
@@ -216,7 +218,8 @@ const Signup = ({onRegister}) => {
                 phone: data.phone,
                 password: data.password,
                 address: data.address,
-                hospital_id: data.hospital_id
+                hospital_id: data.hospital_id,
+                dept:data.dept
             })
             if (res.status === 200 || res.status === 201) {
                 alert("Staff signup done");
@@ -394,22 +397,6 @@ const Signup = ({onRegister}) => {
                                 <input required className={inputStyle} placeholder="Reception / Billing"
                                     value={data.dept}
                                     onChange={e => setData({ ...data, dept: e.target.value })}
-                                />
-                            </div>
-
-                            <div className="space-y-1">
-                                <label className={labelStyle}>Patients Per Day (NOP)</label>
-                                <input type="number" required className={inputStyle}
-                                    value={data.nop}
-                                    onChange={e => setData({ ...data, nop: e.target.value })}
-                                />
-                            </div>
-
-                            <div className="space-y-1">
-                                <label className={labelStyle}>Doctors Available</label>
-                                <input type="number" required className={inputStyle}
-                                    value={data.doctors_available}
-                                    onChange={e => setData({ ...data, doctors_available: e.target.value })}
                                 />
                             </div>
 
