@@ -14,7 +14,7 @@ const labelStyle = "block text-[10px] font-black text-slate-500 uppercase tracki
 
 export default function Profile({user}) {
 
-  console.log("CURRENT LOGGED IN USER:", user);
+  // console.log("CURRENT LOGGED IN USER:", user);
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [hospitals, setHospitals] = useState([]); 
@@ -33,7 +33,7 @@ export default function Profile({user}) {
 
   // EXACT MATCH to your Signup state fields!
   const [formData, setFormData] = useState({
-    fullName: user?.fullName || user?.name || '', // FULL NAME
+    name:  user?.name || '', // FULL NAME
     email: user?.email || '',
     phone: user?.phone || '',
     address: user?.address || '',
@@ -47,8 +47,9 @@ export default function Profile({user}) {
 
   useEffect(() => {
     if (user) {
-      setFormData(prev => ({ ...prev, ...user, fullName: user.fullName || user.name || prev.fullName }));
+      setFormData(prev => ({ ...prev, ...user, name:  user.name || prev.name }));
       if (user.profilePic) setProfilePic(user.profilePic); 
+      console.log(user);
     }
   }, [user]);
 
@@ -67,15 +68,70 @@ export default function Profile({user}) {
     }
   }, [role]);
 
-  const handleSave = async () => {
+const handleSave = async () => {
+  try {
     setIsLoading(true);
-    console.log("Saving new profile data:", formData);
-    setTimeout(() => {
-      setIsLoading(false);
-      setIsEditing(false);
-      alert("Profile updated successfully!");
-    }, 1000);
-  };
+    //      let payload = {};
+
+    // if (role === "patient") {
+    //   payload = {
+    //     name: formData.name,
+    //     phone: formData.phone,
+    //     address: formData.address
+    //   };
+    // }
+
+    // if (role === "doctor") {
+    //   payload = {
+    //     name: formData.name,
+    //     phone: formData.phone,
+    //     address: formData.address,
+    //     speciality: formData.speciality,
+    //     hospital_id: formData.hospital_id
+    //   };
+    // }
+
+    // if (role === "staff") {
+    //   payload = {
+    //     name: formData.name,
+    //     phone: formData.phone,
+    //     dept: formData.dept,
+    //     nop: formData.nop,
+    //     doctors_available: formData.doctors_available,
+    //     hospital_id: formData.hospital_id
+    //   };
+    // }
+
+    // if (role === "admin") {
+    //   payload = {
+    //     name: formData.name,
+    //     address: formData.address
+    //   };
+    // }
+    const payload = Object.fromEntries(
+  Object.entries(formData).filter(
+    ([key, value]) =>
+      value !== undefined &&
+      value !== null &&
+      value !== "" &&
+      key !== "hospitalName"  && // ❌ not in DB
+        key!=="role"
+  )
+);
+    const res = await api("put","auth/update", payload);
+
+    // console.log("Update response:", res);
+
+    setIsEditing(false);
+    alert("Profile updated successfully!");
+
+  } catch (err) {
+    console.error("Update failed:", err);
+    alert("Failed to update profile");
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const handlePhotoUpload = (e) => {
     const file = e.target.files[0];
@@ -121,7 +177,7 @@ export default function Profile({user}) {
           <div className="flex gap-3">
             {isEditing ? (
               <>
-                <button onClick={() => { setIsEditing(false); setFormData({...user, fullName: user.fullName || user.name}); }} className="px-6 py-3 rounded-xl font-bold text-sm bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-all flex items-center">
+                <button onClick={() => { setIsEditing(false); setFormData({...user, name: user.name }); }} className="px-6 py-3 rounded-xl font-bold text-sm bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-all flex items-center">
                   <X size={16} className="mr-2" /> Cancel
                 </button>
                 <button onClick={handleSave} disabled={isLoading} className="px-6 py-3 rounded-xl font-bold text-sm bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/20 transition-all flex items-center disabled:opacity-70">
@@ -152,7 +208,7 @@ export default function Profile({user}) {
               )}
             </div>
 
-            <h2 className="text-xl font-black text-slate-900 dark:text-white mb-1">{formData.fullName || 'User'}</h2>
+            <h2 className="text-xl font-black text-slate-900 dark:text-white mb-1">{formData.name || 'User'}</h2>
             <p className="text-sm font-bold text-slate-500 mb-4">{formData.email}</p>
 
             {/* --- NEW: DOCTOR QUICK IDENTITY --- */}
@@ -190,7 +246,7 @@ export default function Profile({user}) {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>
                   <label className={labelStyle}><User size={14} /> Full Name</label>
-                  <input type="text" value={formData.fullName} onChange={e => setFormData({...formData, fullName: e.target.value})} disabled={!isEditing} className={inputStyle} />
+                  <input type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} disabled={!isEditing} className={inputStyle} />
                 </div>
                 <div>
                   <label className={labelStyle}><Phone size={14} /> Phone Number</label>
