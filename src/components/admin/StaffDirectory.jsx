@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Contact2 } from 'lucide-react';
 
 export default function StaffDirectory({ directory }) {
+  console.log(directory);
   // --- NEW: Filter State ---
   const [roleFilter, setRoleFilter] = useState('All');
 
