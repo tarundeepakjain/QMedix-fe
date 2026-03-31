@@ -31,7 +31,7 @@ function buildDoctorCards(hospitalId, doctorMap) {
       : null;
 
     const queue = doctorQueue.waiting.map(app => ({
-      id:        app.appointment_id,
+      id:        app.id,
       token:     `Q-${queueEngine.getPatientPosition(app.appointment_id) ?? '?'}`,
       name:      app.patient_name ?? 'Patient',
       emergency: app.isEmergency  ?? false,
@@ -183,6 +183,7 @@ export default function ReceptionDashboard({ user }) {
     );
     try {
       await api('DELETE', `staff/cancel-appointment/${appointmentId}`);
+      alert("Appointment Cancelled");
     } catch (err) {
       console.error('Cancel failed:', err);
       alert(err?.response?.data?.message ?? 'Failed to cancel. Please refresh.');
@@ -203,6 +204,7 @@ export default function ReceptionDashboard({ user }) {
     );
     try {
       await api('POST', `staff/toggle-emergency/${appointmentId}`);
+      alert("Emergency toggled.");
     } catch (err) {
       console.error('Toggle emergency failed:', err);
       recompute();
