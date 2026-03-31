@@ -71,6 +71,7 @@ export default function ReceptionDashboard({ user }) {
 
   const [newPatient, setNewPatient] = useState({
     name: '', dept: '', doctorId: '', isEmergency: false,
+    phone: '', gender: '', dob: '', address: '',
   });
 
   const channelRef   = useRef(null);
@@ -146,6 +147,10 @@ export default function ReceptionDashboard({ user }) {
         doctor_id:    newPatient.doctorId,
         hospital_id:  hospitalId,
         isEmergency:  newPatient.isEmergency,
+        phone:        newPatient.phone   || null,
+        gender:       newPatient.gender  || null,
+        dob:          newPatient.dob     || null,
+        address:      newPatient.address || null,
       });
 
       if (res.status === 200 || res.status === 201) {
@@ -159,7 +164,7 @@ export default function ReceptionDashboard({ user }) {
 
         setExpandedDocId(newPatient.doctorId);
         setShowAddModal(false);
-        setNewPatient({ name: '', dept: '', doctorId: '', isEmergency: false });
+        setNewPatient({ name: '', dept: '', doctorId: '', isEmergency: false, phone: '', gender: '', dob: '', address: '' });
 
         await queueEngine.init();
         recompute();
