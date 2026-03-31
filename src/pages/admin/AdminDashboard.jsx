@@ -240,8 +240,7 @@ export default function AdminDashboard({ user }) {
 
   const handleApprove = async (id) => {
     const approved = pendingUsers.find(u => u.id === id);
-    const roleForUrl = approved?.role?.toLowerCase() ?? 'staff';
-
+    const roleForUrl = approved?.role?.toLowerCase() ?? 'hospital-staff';
     setPendingUsers(prev => prev.filter(u => u.id !== id));
 
     try {
