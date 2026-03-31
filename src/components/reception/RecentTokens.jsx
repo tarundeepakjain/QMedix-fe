@@ -5,7 +5,7 @@ export default function RecentTokens({ recentRegistrations }) {
   return (
     <div className="bg-white dark:bg-[#111827] rounded-[2.5rem] p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col h-fit">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-lg font-black text-slate-900 dark:text-white uppercase tracking-widest">Recent Tokens</h2>
+        <h2 className="text-lg font-black text-slate-900 dark:text-white uppercase tracking-widest">Walk-In Tokens</h2>
       </div>
       
       <div className="flex-1 space-y-4">

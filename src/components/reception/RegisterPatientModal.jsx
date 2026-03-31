@@ -2,13 +2,13 @@ import React from 'react';
 import { X } from 'lucide-react';
 
 export default function RegisterPatientModal({ 
-  onClose, onSubmit, newPatient, setNewPatient, departments, availableFormDoctors 
+  onClose, onSubmit, newPatient, setNewPatient, departments, availableFormDoctors, submitting
 }) {
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
       <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={onClose}></div>
       
-      <div className="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-[2rem] shadow-2xl border border-slate-100 dark:border-slate-800 p-6 sm:p-8 animate-in zoom-in-95 duration-200">
+      <div className="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-[2rem] shadow-2xl border border-slate-100 dark:border-slate-800 p-6 sm:p-8 animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
         <button onClick={onClose} className="absolute top-6 right-6 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 bg-slate-100 dark:bg-slate-800 p-2 rounded-full transition-colors">
           <X size={18} />
         </button>
@@ -25,6 +25,53 @@ export default function RegisterPatientModal({
               onChange={(e) => setNewPatient({...newPatient, name: e.target.value})}
               className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3.5 text-sm font-semibold outline-none focus:ring-2 focus:ring-blue-500/50"
               placeholder="e.g. John Doe" 
+            />
+          </div>
+
+          <div>
+            <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 ml-1">Phone Number</label>
+            <input
+              type="text"
+              value={newPatient.phone}
+              onChange={(e) => setNewPatient({...newPatient, phone: e.target.value})}
+              className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3.5 text-sm font-semibold outline-none focus:ring-2 focus:ring-blue-500/50"
+              placeholder="e.g. 9876543210"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 ml-1">Gender</label>
+              <select
+                value={newPatient.gender}
+                onChange={(e) => setNewPatient({...newPatient, gender: e.target.value})}
+                className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3.5 text-sm font-semibold outline-none focus:ring-2 focus:ring-blue-500/50 appearance-none"
+              >
+                <option value="">Select</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 ml-1">Date of Birth</label>
+              <input
+                type="date"
+                value={newPatient.dob}
+                onChange={(e) => setNewPatient({...newPatient, dob: e.target.value})}
+                className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3.5 text-sm font-semibold outline-none focus:ring-2 focus:ring-blue-500/50"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 ml-1">Address</label>
+            <input
+              type="text"
+              value={newPatient.address}
+              onChange={(e) => setNewPatient({...newPatient, address: e.target.value})}
+              className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3.5 text-sm font-semibold outline-none focus:ring-2 focus:ring-blue-500/50"
+              placeholder="e.g. 123 Main St, City"
             />
           </div>
 
@@ -74,10 +121,10 @@ export default function RegisterPatientModal({
 
           <button 
             type="submit" 
-            disabled={availableFormDoctors.length === 0}
+            disabled={availableFormDoctors.length === 0 || submitting}
             className="w-full bg-blue-600 disabled:bg-slate-300 hover:bg-blue-700 text-white font-black py-4 rounded-xl mt-4 transition-all active:scale-[0.98] shadow-lg shadow-blue-500/25"
           >
-            Create Token
+            {submitting ? 'Registering...' : 'Create Token'}
           </button>
         </form>
       </div>
