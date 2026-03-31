@@ -22,9 +22,9 @@ class QueueEngine {
     doctorQueue.waiting.sort((a, b) => {
 
       // emergency first
-      if (a.is_emergency !== b.is_emergency) {
-        return b.is_emergency - a.is_emergency;
-      }
+    if (a.isEmergency !== b.isEmergency) {
+      return b.isEmergency - a.isEmergency;
+    }
 
       // then by created_at
       return new Date(a.created_at) - new Date(b.created_at);

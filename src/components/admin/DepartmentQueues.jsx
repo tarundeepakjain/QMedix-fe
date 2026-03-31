@@ -1,7 +1,10 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Activity, Users, Stethoscope } from 'lucide-react';
 
 export default function DepartmentQueues({ departments }) {
+  // useEffect(()=>{
+  //   console.log(departments);
+  // },[2000])
   return (
     <div className="space-y-6">
       <h2 className="text-xl font-black text-slate-900 dark:text-white tracking-tight uppercase px-2">Global Department Queues</h2>

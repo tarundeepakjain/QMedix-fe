@@ -174,6 +174,7 @@ export default function AdminDashboard({ user }) {
   const recomputeDeptQueues = useCallback(() => {
     const dq = normaliseDepartmentQueues(hospitalId, directoryRef.current);
     setDeptQueues(dq);
+    console.log(dq);
   }, [hospitalId]);
 
   const recomputeAll = useCallback(() => {
@@ -217,7 +218,6 @@ export default function AdminDashboard({ user }) {
     queueEngine.init().then(() => {
       recomputeAll();
     });
-
     channelRef.current = createAppointmentChannel({
       filter:  `hospital_id=eq.${hospitalId}`,
       onEvent: recomputeAll,
