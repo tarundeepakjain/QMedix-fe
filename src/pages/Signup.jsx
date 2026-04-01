@@ -208,6 +208,7 @@ const Signup = ({onRegister}) => {
         setIsLoading(true);
         if (!data.email || !data.phone || !data.password || !data.fullName ||!data.hospital_id ) {
             alert("all fields are required");
+            return;
         }
         try {
             const res = await api("post", "auth/signup/hospital-staff", {
@@ -393,22 +394,6 @@ const Signup = ({onRegister}) => {
                                 <input required className={inputStyle} placeholder="Reception / Billing"
                                     value={data.dept}
                                     onChange={e => setData({ ...data, dept: e.target.value })}
-                                />
-                            </div>
-
-                            <div className="space-y-1">
-                                <label className={labelStyle}>Patients Per Day (NOP)</label>
-                                <input type="number" required className={inputStyle}
-                                    value={data.nop}
-                                    onChange={e => setData({ ...data, nop: e.target.value })}
-                                />
-                            </div>
-
-                            <div className="space-y-1">
-                                <label className={labelStyle}>Doctors Available</label>
-                                <input type="number" required className={inputStyle}
-                                    value={data.doctors_available}
-                                    onChange={e => setData({ ...data, doctors_available: e.target.value })}
                                 />
                             </div>
 
