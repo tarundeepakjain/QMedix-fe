@@ -13,8 +13,6 @@
 [![State Management](https://img.shields.io/badge/State-ContextAPI-blue)](#)
 [![Routing](https://img.shields.io/badge/Routing-ReactRouter-CA4245?logo=react-router)](https://reactrouter.com/)
 
-[![Responsive](https://img.shields.io/badge/UI-Responsive-black)](#)
-
 QMedix is a healthcare management interface designed to bridge the gap between online appointments and walk-in patients. It provides a seamless, real-time experience for patients, doctors, and hospital staff through a unified digital ecosystem.
 
 ---
