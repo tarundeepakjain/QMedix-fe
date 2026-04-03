@@ -66,7 +66,27 @@ useEffect(() => {
   const buildQueue = useCallback(() => {
     if (!hospitalId || !doctorId) return;
     const raw = queueEngine.getDoctorQueue(hospitalId, doctorId);
-    const normalised = raw.map(app => normaliseQueueItem(app, patientMapRef.current));
+    const normalised = raw.map((app, index) => {
+      const patient = patientMapRef.current.get(app.patient_id) ?? {};
+
+      return {
+        id: app.id ?? app.appointment_id,
+        appointment_id: app.id ?? app.appointment_id,
+        patient_id: app.patient_id,
+
+        token: `Q-${index + 1}`,   // ✅ local numbering
+
+        name: patient.name ?? 'Patient',
+        age: patient.age ?? null,
+        dob: patient.dob ?? null,
+        gender: patient.gender ?? '—',
+        phone: patient.phone ?? '—',
+
+        isEmergency: app.isEmergency ?? false,
+        booked_for: app.booked_for,
+        status: app.status,
+      };
+    });
     setQueue(normalised);
 
     const inProgressRaw = queueEngine.queues

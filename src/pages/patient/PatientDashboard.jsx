@@ -7,11 +7,17 @@ import HistoryTable from '../../components/patient/HistoryTable';
 import api from '../../services/apiWrapper.js';
 import queueEngine from '../../services/queueEngine.js';
 import { createAppointmentChannel, removeChannel } from '../../services/realtimeService.js';
-import { useAuth } from '../../context/authContext.jsx';
+
+// ---------------------------------------------------------------------------
+// normalise: converts a raw appointment (from API or engine) into UI shape.
+// Token is ALWAYS derived from queueEngine.getPatientPosition so it matches
+// Doctor and Reception dashboards.
+// ---------------------------------------------------------------------------
 function normalise(appointment) {
-  const status   = appointment.status; // 'waiting' | 'in_progress' | 'pending'
+  const status   = appointment.status; // 'waiting' | 'in_progress' | 'pending' | 'completed'
   const isActive = status === 'waiting' || status === 'in_progress';
 
+  // Position comes ONLY from the engine – never from the raw API object
   const position = isActive
     ? queueEngine.getPatientPosition(appointment.appointment_id)
     : null;
@@ -30,8 +36,9 @@ function normalise(appointment) {
     _raw_status:    status,
     _position:      position,
 
+    // Token: Q-N for active, "Pending" for upcoming, nothing for history
     token_number: position ? `Q-${position}` : 'Pending',
-    serving_token: 'N/A', // patched in second pass
+    serving_token: 'N/A', // patched in second pass below
 
     status:
       status === 'waiting'       ? 'Waiting'
@@ -41,54 +48,104 @@ function normalise(appointment) {
   };
 }
 
-export default function PatientDashboard({user,sDark}) {
-  const [liveData,    setLiveData]    = useState([]); // waiting / in_progress
-  const [pendingData, setPendingData] = useState([]); // upcoming pending bookings
-  const [historyData, setHistoryData] = useState([]); // past appointments (booked_for < now)
-  const [loading,     setLoading]     = useState(true);
-  const [cancelling,  setCancelling]  = useState(null); // appointment_id being cancelled
-  const pollingRef  = useRef(null);
-  const channelRef  = useRef(null);
-  const navigate    = useNavigate();
-  // const {user}=useAuth();
-// console.log(user);
-  const fetchPatientAppointments = useCallback(async () => {
+// ---------------------------------------------------------------------------
+// deriveFromEngine:
+//   1. Populate the engine with the fresh API response.
+//   2. Walk every hospital → every doctor queue in the engine to get the
+//      CANONICAL active list (waiting + in_progress).
+//   3. The engine is now the single source of truth for queue order & tokens.
+// ---------------------------------------------------------------------------
+function deriveFromEngine(raw, userId) {
+  // Step 1 – feed the engine
+  queueEngine.buildQueues(raw);
 
+  const now = new Date();
+
+  // Step 2 – history: past appointments from the raw API list
+  // (engine only tracks today's active queues; historical data lives in API)
+  const history = raw.filter(a => new Date(a.booked_for) < now);
+
+  // Step 3 – build the canonical active list from the engine.
+  // We iterate the engine's internal queues and collect every appointment
+  // that belongs to this patient (matched by patient_id === userId).
+  const engineActive = [];
+
+  queueEngine.queues.forEach((hospitalMap) => {
+    hospitalMap.forEach((doctorQueue) => {
+      [...doctorQueue.in_progress, ...doctorQueue.waiting].forEach(app => {
+        if (app.patient_id === userId) {
+          engineActive.push(app);
+        }
+      });
+    });
+  });
+
+  // Step 4 – also include "pending" (future-booked, not yet in engine queue)
+  // These come from the raw API list since the engine only holds today's slots.
+  const engineActivIds = new Set(engineActive.map(a => a.appointment_id));
+  const pendingFromApi = raw.filter(
+    a =>
+      a.status === 'pending' &&
+      new Date(a.booked_for) >= now &&
+      !engineActivIds.has(a.appointment_id)
+  );
+
+  // Step 5 – normalise (tokens from engine positions)
+  const normalisedActive  = engineActive.map(normalise);
+  const normalisedPending = pendingFromApi.map(normalise);
+
+  // Step 6 – patch "serving_token" (the currently-in-progress token for the
+  // same doctor queue, so the patient can see who is being served right now)
+  const patchServingToken = (list) => {
+    return list.map(a => {
+      if (a._raw_status !== 'waiting' && a._raw_status !== 'in_progress') {
+        return a;
+      }
+      // Find the in_progress appointment in the same doctor's queue
+      let servingLabel = 'N/A';
+      queueEngine.queues.forEach((hospitalMap) => {
+        hospitalMap.forEach((doctorQueue) => {
+          const inProg = doctorQueue.in_progress[0];
+          if (inProg) {
+            const pos = queueEngine.getPatientPosition(inProg.appointment_id);
+            // in_progress patients don't have a waiting position; label them Q-0
+            // to indicate they're being served
+            servingLabel = pos ? `Q-${pos}` : 'Q-1';
+          }
+        });
+      });
+      return { ...a, serving_token: servingLabel };
+    });
+  };
+
+  const liveData    = patchServingToken(normalisedActive);
+  const pendingData = normalisedPending;
+
+  return { liveData, pendingData, history };
+}
+
+export default function PatientDashboard({ user }) {
+  const [liveData,    setLiveData]    = useState([]);
+  const [pendingData, setPendingData] = useState([]);
+  const [historyData, setHistoryData] = useState([]);
+  const [loading,     setLoading]     = useState(true);
+  const [cancelling,  setCancelling]  = useState(null);
+
+  const pollingRef = useRef(null);
+  const channelRef = useRef(null);
+  const navigate   = useNavigate();
+
+  const fetchPatientAppointments = useCallback(async () => {
     try {
       const res = await api('GET', 'patient/get-appointments');
       const raw = res.data?.data ?? [];
-      queueEngine.buildQueues(raw);
-      // console.log(res.data);
-      const now = new Date();
 
-      const history = raw.filter(a => new Date(a.booked_for) < now);
+      // Derive EVERYTHING from the engine after feeding it the raw data
+      const { liveData, pendingData, history } = deriveFromEngine(raw, user?.id);
 
-      const active = raw.filter(
-        a => new Date(a.booked_for) >= now && a.status !== 'completed'
-      );
-
-      const normalised = active.map(normalise);
-
-      const servingCard = normalised
-        .filter(a => a._raw_status === 'in_progress')
-        .sort((a, b) => (a._position ?? 999) - (b._position ?? 999))[0];
-
-      const servingLabel = servingCard ? servingCard.token_number : 'N/A';
-
-      const patched = normalised.map(a => ({
-        ...a,
-        serving_token:
-          a._raw_status === 'waiting' || a._raw_status === 'in_progress'
-            ? servingLabel
-            : 'N/A',
-      }));
-
-      setLiveData(patched.filter(
-        a => a._raw_status === 'waiting' || a._raw_status === 'in_progress'
-      ));
-      setPendingData(patched.filter(a => a._raw_status === 'pending'));
+      setLiveData(liveData);
+      setPendingData(pendingData);
       setHistoryData(history);
-
     } catch (err) {
       console.error('Failed to fetch patient appointments:', err);
     } finally {
@@ -97,12 +154,10 @@ export default function PatientDashboard({user,sDark}) {
   }, [user]);
 
   useEffect(() => {
- if (!user) {
+    if (!user) return;
 
-    return;
-  }
     queueEngine.init().then(() => {
-       console.log("Queue engine initialized");
+      console.log('Queue engine initialized');
       fetchPatientAppointments();
     });
 
@@ -157,7 +212,7 @@ export default function PatientDashboard({user,sDark}) {
                   Upcoming Sessions
                 </h1>
                 <p className="text-slate-500 font-semibold uppercase text-xs tracking-wider">
-                   Medical Sessions
+                  Medical Sessions
                 </p>
               </div>
               {liveData.length > 0 && (

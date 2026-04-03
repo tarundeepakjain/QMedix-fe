@@ -12,7 +12,8 @@ import { useDoctors }        from '../../data/doctor';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function buildDoctorCards(hospitalId, doctorMap) {
+// patientMap is passed in so this function is pure (no closure over a ref)
+function buildDoctorCards(hospitalId, doctorMap, patientMap) {
   const hospitalMap = queueEngine.queues.get(hospitalId);
   if (!hospitalMap) return [];
 
@@ -22,19 +23,27 @@ function buildDoctorCards(hospitalId, doctorMap) {
     const meta = doctorMap[doctorId] ?? {};
 
     const inProg  = doctorQueue.in_progress[0] ?? null;
+
+    // ── current patient: resolve name from patientMap ──────────────────────
     const current = inProg
       ? {
           token:     `Q-${queueEngine.getPatientPosition(inProg.appointment_id) ?? 1}`,
-          name:      inProg.patient_name ?? 'Patient',
-          emergency: inProg.isEmergency  ?? false,
+          // Use patientMap first; fall back to whatever the engine stored
+          name:      patientMap.get(inProg.patient_id)?.name
+                     ?? inProg.patient_name
+                     ?? 'Patient',
+          emergency: inProg.isEmergency ?? false,
         }
       : null;
 
-    const queue = doctorQueue.waiting.map(app => ({
-      id:        app.id,
-      token:     `Q-${queueEngine.getPatientPosition(app.appointment_id) ?? '?'}`,
-      name:      app.patient_name ?? 'Patient',
-      emergency: app.isEmergency  ?? false,
+    // ── waiting queue: resolve names from patientMap ───────────────────────
+    const queue = doctorQueue.waiting.map((app, index) => ({
+      id: app.id,
+      token: `Q-${index + 1}`,   
+      name: patientMap.get(app.patient_id)?.name
+            ?? app.patient_name
+            ?? 'Patient',
+      emergency: app.isEmergency ?? false,
     }));
 
     cards.push({
@@ -61,6 +70,9 @@ export default function ReceptionDashboard({ user }) {
 
   const { doctorMap } = useDoctors(hospitalId);
 
+  // ── patientMap: same pattern as DoctorDashboard ───────────────────────────
+  const patientMapRef = useRef(new Map());
+
   const [doctorCards,         setDoctorCards]         = useState([]);
   const [departments,         setDepartments]         = useState(['All']);
   const [selectedDept,        setSelectedDept]        = useState('All');
@@ -76,10 +88,7 @@ export default function ReceptionDashboard({ user }) {
 
   const channelRef   = useRef(null);
   const pollingRef   = useRef(null);
-  // Always holds the latest recompute — channel/interval read from this ref
-  // so they never hold a stale closure over doctorMap
   const recomputeRef = useRef(null);
-  // Always holds the latest doctorMap without causing channel to re-subscribe
   const doctorMapRef = useRef(doctorMap);
 
   // Keep doctorMapRef current on every render
@@ -87,14 +96,41 @@ export default function ReceptionDashboard({ user }) {
     doctorMapRef.current = doctorMap;
   });
 
-  // recompute reads doctorMapRef.current — never stale, never depends on doctorMap
-  const recompute = useCallback(() => {
-    const cards = buildDoctorCards(hospitalId, doctorMapRef.current);
+  // ── fetchPatientDetails: mirrors DoctorDashboard exactly ──────────────────
+  const fetchPatientDetails = useCallback(async (patientIds) => {
+    const toFetch = patientIds.filter(id => id && !patientMapRef.current.has(id));
+    if (toFetch.length === 0) return;
+    try {
+      const res = await api('POST', 'patient/batch-details', { ids: toFetch });
+      const patients = res.data?.patients ?? [];
+      patients.forEach(p => patientMapRef.current.set(p.id, p));
+    } catch (err) {
+      console.error('Failed to fetch patient details for reception:', err);
+    }
+  }, []);
+
+  // recompute: fetch missing patient names then rebuild doctor cards
+  const recompute = useCallback(async () => {
+    const hospitalMap = queueEngine.queues.get(hospitalId);
+    if (hospitalMap) {
+      // Collect all patient_ids currently in engine (waiting + in_progress)
+      const allPatientIds = [];
+      hospitalMap.forEach((doctorQueue) => {
+        [...doctorQueue.in_progress, ...doctorQueue.waiting].forEach(app => {
+          if (app.patient_id) allPatientIds.push(app.patient_id);
+        });
+      });
+
+      // Fetch any we don't have yet
+      await fetchPatientDetails([...new Set(allPatientIds)]);
+    }
+
+    const cards = buildDoctorCards(hospitalId, doctorMapRef.current, patientMapRef.current);
     setDoctorCards(cards);
     setDepartments(getDepartments(cards));
-  }, [hospitalId]);
+  }, [hospitalId, fetchPatientDetails]);
 
-  // Keep recomputeRef pointing to latest recompute after every render
+  // Keep recomputeRef pointing to the latest recompute closure
   useEffect(() => {
     recomputeRef.current = recompute;
   });
@@ -103,7 +139,6 @@ export default function ReceptionDashboard({ user }) {
   useEffect(() => {
     if (!hospitalId) return;
 
-    // Stable wrapper — always calls whatever recomputeRef holds at invocation time
     const stableOnEvent = () => recomputeRef.current?.();
 
     queueEngine.init().then(stableOnEvent);
@@ -188,7 +223,7 @@ export default function ReceptionDashboard({ user }) {
     );
     try {
       await api('DELETE', `staff/cancel-appointment/${appointmentId}`);
-      alert("Appointment Cancelled");
+      alert('Appointment Cancelled');
     } catch (err) {
       console.error('Cancel failed:', err);
       alert(err?.response?.data?.message ?? 'Failed to cancel. Please refresh.');
@@ -209,7 +244,7 @@ export default function ReceptionDashboard({ user }) {
     );
     try {
       await api('POST', `staff/toggle-emergency/${appointmentId}`);
-      alert("Emergency toggled.");
+      alert('Emergency toggled.');
     } catch (err) {
       console.error('Toggle emergency failed:', err);
       recompute();
@@ -237,7 +272,6 @@ export default function ReceptionDashboard({ user }) {
           onOpenModal={() => setShowAddModal(true)}
         />
 
-        {/* ← grid-cols-3 → grid-cols-4 to add EmergencyRequests column */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           <DoctorList
             doctors={filteredDoctors}
