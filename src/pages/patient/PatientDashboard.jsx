@@ -101,19 +101,17 @@ function deriveFromEngine(raw, userId) {
       if (a._raw_status !== 'waiting' && a._raw_status !== 'in_progress') {
         return a;
       }
-      // Find the in_progress appointment in the same doctor's queue
+      // Look up the queue for this specific doctor
+      // Note: hospital key is undefined, and doctor key is the doctor's name (a.doctor_name)
+      const doctorQueue = queueEngine.queues.get(undefined)?.get(a.doctor_name);
       let servingLabel = 'N/A';
-      queueEngine.queues.forEach((hospitalMap) => {
-        hospitalMap.forEach((doctorQueue) => {
-          const inProg = doctorQueue.in_progress[0];
-          if (inProg) {
-            const pos = queueEngine.getPatientPosition(inProg.appointment_id);
-            // in_progress patients don't have a waiting position; label them Q-0
-            // to indicate they're being served
-            servingLabel = pos ? `Q-${pos}` : 'Q-1';
-          }
-        });
-      });
+      if (doctorQueue) {
+        const inProg = doctorQueue.in_progress[0];
+        if (inProg) {
+          const pos = queueEngine.getPatientPosition(inProg.appointment_id);
+          servingLabel = pos ? `Q-${pos}` : 'Q-1';
+        }
+      }
       return { ...a, serving_token: servingLabel };
     });
   };

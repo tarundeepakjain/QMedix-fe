@@ -3,6 +3,7 @@ import DoctorHeader from '../../components/doctor/DoctorHeader';
 import ActiveSession from '../../components/doctor/ActiveSession';
 import QueueControls from '../../components/doctor/QueueControls';
 import QueueTable from '../../components/doctor/QueueTable';
+import AIChatbotPanel from '../../components/doctor/AIChatbotPanel';
 import api from '../../services/apiWrapper';
 import queueEngine from '../../services/queueEngine';
 import { createAppointmentChannel, removeChannel } from '../../services/realtimeService';
@@ -68,13 +69,15 @@ useEffect(() => {
     const raw = queueEngine.getDoctorQueue(hospitalId, doctorId);
     const normalised = raw.map((app, index) => {
       const patient = patientMapRef.current.get(app.patient_id) ?? {};
+      const appId = app.id ?? app.appointment_id;
+      const pos = queueEngine.getPatientPosition(appId);
 
       return {
-        id: app.id ?? app.appointment_id,
-        appointment_id: app.id ?? app.appointment_id,
+        id: appId,
+        appointment_id: appId,
         patient_id: app.patient_id,
 
-        token: `Q-${index + 1}`,   // ✅ local numbering
+        token: pos ? `Q-${pos}` : `Q-${index + 1}`,
 
         name: patient.name ?? 'Patient',
         age: patient.age ?? null,
@@ -270,7 +273,7 @@ if (user?.status==="PENDING")  {
           toggling={toggling}
           onToggle={handleToggleAvailability}
         />
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           <ActiveSession
             currentPatient={currentPatient}
             remarks={remarks}
@@ -284,6 +287,7 @@ if (user?.status==="PENDING")  {
             queueLength={queue.length}
             completedCount={completedCount}
           />
+          {/* <AIChatbotPanel currentPatient={currentPatient} /> */}
         </div>
         <QueueTable queue={queue} />
       </div>

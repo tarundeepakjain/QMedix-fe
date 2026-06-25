@@ -18,7 +18,7 @@ export default function BookAppointment({ user }) {
 
   const { hospitalMap } = useHospitals();
   const hospitals = Object.values(hospitalMap);
-
+ 
   const [doctors,         setDoctors]         = useState([]);
   const [departments,     setDepartments]     = useState([]);
   const [filteredDoctors, setFilteredDoctors] = useState([]);

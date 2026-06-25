@@ -7,6 +7,16 @@ class QueueEngine {
     this.positions = new Map();
   }
 
+  normalizeApp(app) {
+    if (!app) return app;
+    const id = app.appointment_id || app.id;
+    return {
+      ...app,
+      id: id,
+      appointment_id: id
+    };
+  }
+
   async init() {
     const res = await api("GET", "/global/appointments/today");
     const appointments = res.data?.data;
@@ -37,18 +47,28 @@ class QueueEngine {
       this.positions.delete(app.appointment_id);
     });
 
-    // Assign positions ONLY to waiting patients (not in_progress / completed)
-    // Q-1 = next up, Q-2 = second, etc.
-    doctorQueue.waiting.forEach((app, index) => {
-      this.positions.set(app.appointment_id, index + 1);
+    let currentPosition = 1;
+
+    // Assign position 1 to the in-progress patient if one exists
+    doctorQueue.in_progress.forEach(app => {
+      this.positions.set(app.appointment_id, currentPosition);
+      currentPosition++;
+    });
+
+    // Assign subsequent positions to waiting patients
+    doctorQueue.waiting.forEach(app => {
+      this.positions.set(app.appointment_id, currentPosition);
+      currentPosition++;
     });
   }
 
   buildQueues(appointments) {
     this.appointments.clear();
     this.queues.clear();
+    if (!appointments) return;
 
-    appointments.forEach(app => {
+    appointments.forEach(rawApp => {
+      const app = this.normalizeApp(rawApp);
       this.appointments.set(app.appointment_id, app);
 
       const hospitalId = app.hospital_id;
@@ -80,7 +100,8 @@ class QueueEngine {
     });
   }
 
-  handleInsert(app) {
+  handleInsert(rawApp) {
+    const app = this.normalizeApp(rawApp);
     this.appointments.set(app.appointment_id, app);
 
     const h = app.hospital_id;
@@ -108,7 +129,8 @@ class QueueEngine {
     this.rebuildPositions(h, d);
   }
 
-  handleUpdate(newApp) {
+  handleUpdate(rawApp) {
+    const newApp = this.normalizeApp(rawApp);
     const oldApp = this.appointments.get(newApp.appointment_id);
     if (!oldApp) return;
 
@@ -120,7 +142,7 @@ class QueueEngine {
 
     const oldList = doctorQueue[oldApp.status];
     const index = oldList.findIndex(
-      a => a.appointment_id === oldApp.appointment_id
+      a => (a.appointment_id || a.id) === oldApp.appointment_id
     );
 
     if (index !== -1) {
@@ -136,7 +158,8 @@ class QueueEngine {
     this.appointments.set(newApp.appointment_id, newApp);
   }
 
-  handleDelete(app) {
+  handleDelete(rawApp) {
+    const app = this.normalizeApp(rawApp);
     const h = app.hospital_id;
     const d = app.assigned_doctor;
 
@@ -145,7 +168,7 @@ class QueueEngine {
 
     const list = doctorQueue[app.status];
     const index = list.findIndex(
-      a => a.appointment_id === app.appointment_id
+      a => (a.appointment_id || a.id) === app.appointment_id
     );
 
     if (index !== -1) {

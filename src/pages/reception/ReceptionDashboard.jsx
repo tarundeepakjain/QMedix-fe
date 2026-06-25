@@ -37,14 +37,18 @@ function buildDoctorCards(hospitalId, doctorMap, patientMap) {
       : null;
 
     // ── waiting queue: resolve names from patientMap ───────────────────────
-    const queue = doctorQueue.waiting.map((app, index) => ({
-      id: app.id,
-      token: `Q-${index + 1}`,   
-      name: patientMap.get(app.patient_id)?.name
-            ?? app.patient_name
-            ?? 'Patient',
-      emergency: app.isEmergency ?? false,
-    }));
+    const queue = doctorQueue.waiting.map((app, index) => {
+      const appId = app.appointment_id || app.id;
+      const pos = queueEngine.getPatientPosition(appId);
+      return {
+        id: appId,
+        token: pos ? `Q-${pos}` : `Q-${(inProg ? 1 : 0) + index + 1}`,
+        name: patientMap.get(app.patient_id)?.name
+              ?? app.patient_name
+              ?? 'Patient',
+        emergency: app.isEmergency ?? false,
+      };
+    });
 
     cards.push({
       id:     doctorId,
