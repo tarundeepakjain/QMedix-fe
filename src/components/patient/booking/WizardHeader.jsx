@@ -2,13 +2,23 @@ import React from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-export default function WizardHeader({ step, setStep }) {
+export default function WizardHeader({ step, setStep, isEmergency }) {
   const navigate = useNavigate();
+  
+  const handleBack = () => {
+    if (step === 5 && isEmergency) {
+      setStep(3);
+    } else if (step > 1) {
+      setStep(step - 1);
+    } else {
+      navigate('/patient/dashboard');
+    }
+  };
   
   return (
     <div className="flex items-center justify-between mb-10">
       <button 
-        onClick={() => step > 1 ? setStep(step - 1) : navigate('/patient/dashboard')} 
+        onClick={handleBack} 
         className="flex items-center text-sm font-bold text-slate-500 hover:text-blue-600 transition-colors dark:text-slate-400"
       >
         <ArrowLeft size={16} className="mr-2" /> {step > 1 ? 'Back' : 'Cancel'}

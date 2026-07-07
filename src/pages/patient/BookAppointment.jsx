@@ -96,12 +96,24 @@ export default function BookAppointment({ user }) {
 
   // ── Step 3 → 4: pick doctor ──────────────────────────────────────────────
   const selectDoctor = (doc) => {
-    setFormData(prev => ({
-      ...prev,
-      pref_doctor: doc.id,
-      doctor_name: doc.name,
-    }));
-    setStep(4);
+    if (formData.isEmergency) {
+      const todayStr = new Date().toLocaleDateString('en-CA');
+      setFormData(prev => ({
+        ...prev,
+        pref_doctor: doc.id,
+        doctor_name: doc.name,
+        bookingDate: todayStr,
+        timeSlot:    '09:00 AM', // Earliest slot for immediate today assignment
+      }));
+      setStep(5);
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        pref_doctor: doc.id,
+        doctor_name: doc.name,
+      }));
+      setStep(4);
+    }
   };
 
   // ── Step 5: submit ───────────────────────────────────────────────────────
@@ -151,7 +163,7 @@ export default function BookAppointment({ user }) {
 
   return (
     <div className="max-w-4xl mx-auto py-8 px-4">
-      <WizardHeader step={step} setStep={setStep} />
+      <WizardHeader step={step} setStep={setStep} isEmergency={formData.isEmergency} />
 
       <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-[3rem] p-6 sm:p-10 shadow-xl min-h-[400px]">
         {fetchingDoctors ? (
