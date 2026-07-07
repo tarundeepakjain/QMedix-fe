@@ -192,7 +192,10 @@ export default function ReceptionDashboard({ user }) {
       });
 
       if (res.status === 200 || res.status === 201) {
-        const token       = res.data?.token ?? '—';
+        await queueEngine.init();
+
+        const appId = res.data?.details?.appointment_id || res.data?.details?.id;
+        const token = appId ? (queueEngine.getPatientToken(appId) ?? '—') : '—';
         const currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
         setRecentRegistrations(prev => [
@@ -204,7 +207,6 @@ export default function ReceptionDashboard({ user }) {
         setShowAddModal(false);
         setNewPatient({ name: '', dept: '', doctorId: '', isEmergency: false, phone: '', gender: '', dob: '', address: '' });
 
-        await queueEngine.init();
         recompute();
       }
     } catch (err) {
