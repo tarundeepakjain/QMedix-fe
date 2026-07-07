@@ -20,7 +20,8 @@ function buildDoctorCards(hospitalId, doctorMap, patientMap) {
   const cards = [];
 
   hospitalMap.forEach((doctorQueue, doctorId) => {
-    const meta = doctorMap[doctorId] ?? {};
+    if (!doctorId || doctorId === 'null' || doctorId === 'undefined') return;
+    const meta = (doctorMap && doctorMap[doctorId]) ?? {};
 
     const inProg  = doctorQueue.in_progress[0] ?? null;
 
