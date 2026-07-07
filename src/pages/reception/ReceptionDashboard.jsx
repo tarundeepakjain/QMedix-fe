@@ -12,24 +12,28 @@ import { useDoctors }        from '../../data/doctor';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-// patientMap is passed in so this function is pure (no closure over a ref)
 function buildDoctorCards(hospitalId, doctorMap, patientMap) {
-  const hospitalMap = queueEngine.queues.get(hospitalId);
-  if (!hospitalMap) return [];
-
   const cards = [];
+  if (!doctorMap) return [];
 
-  hospitalMap.forEach((doctorQueue, doctorId) => {
+  const hospitalMap = queueEngine.queues.get(hospitalId) || new Map();
+
+  Object.keys(doctorMap).forEach((doctorId) => {
     if (!doctorId || doctorId === 'null' || doctorId === 'undefined') return;
-    const meta = (doctorMap && doctorMap[doctorId]) ?? {};
+    const meta = doctorMap[doctorId] ?? {};
+
+    const doctorQueue = hospitalMap.get(doctorId) || {
+      in_progress: [],
+      waiting: [],
+      completed: [],
+    };
 
     const inProg  = doctorQueue.in_progress[0] ?? null;
 
-        // ── current patient: resolve name from patientMap ──────────────────────
+    // ── current patient: resolve name from patientMap ──────────────────────
     const current = inProg
       ? {
           token:     queueEngine.getPatientToken(inProg.appointment_id) ?? 'Q-1',
-          // Use patientMap first; fall back to whatever the engine stored
           name:      patientMap.get(inProg.patient_id)?.name
                      ?? inProg.patient_name
                      ?? 'Patient',

@@ -31,13 +31,14 @@ export default function App() {
       const res = await api("get", "auth/me");
       console.log(res.data);
       setUser(res.data.user);
-    
-      // console.log(user);
+      setLoading(false);
+      return res.data.user;
     } catch(error) {
       setUser(null);
       console.error("Auth fetch error:", error);
+      setLoading(false);
+      return null;
     }
-    setLoading(false);
   };
 
   useEffect(() => {
@@ -51,12 +52,13 @@ export default function App() {
   };
 
   const handleLogin = async() => {
-const userFetched = await fetchUser();
-// console.log(userFetched)
-    if (userFetched.role === 'hospital-staff') {
-      navigate('/staff/dashboard');
-    } else {
-      navigate(`/${userFetched.role}/dashboard`);
+    const userFetched = await fetchUser();
+    if (userFetched) {
+      if (userFetched.role === 'hospital-staff') {
+        navigate('/staff/dashboard');
+      } else {
+        navigate(`/${userFetched.role}/dashboard`);
+      }
     }
   };
   // useEffect(() => {
