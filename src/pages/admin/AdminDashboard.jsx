@@ -130,7 +130,7 @@ function normaliseDepartmentQueues(hospitalId, staffDirectory) {
     const servingApp  = doctorQueue.in_progress[0] || null;
 
     const servingToken = servingApp
-      ? `Q-${queueEngine.getPatientPosition(servingApp.appointment_id) ?? 1}`
+      ? queueEngine.getPatientToken(servingApp.appointment_id)
       : null;
 
     const doctorCard = {

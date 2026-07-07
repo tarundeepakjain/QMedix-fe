@@ -24,10 +24,10 @@ function buildDoctorCards(hospitalId, doctorMap, patientMap) {
 
     const inProg  = doctorQueue.in_progress[0] ?? null;
 
-    // ── current patient: resolve name from patientMap ──────────────────────
+        // ── current patient: resolve name from patientMap ──────────────────────
     const current = inProg
       ? {
-          token:     `Q-${queueEngine.getPatientPosition(inProg.appointment_id) ?? 1}`,
+          token:     queueEngine.getPatientToken(inProg.appointment_id) ?? 'Q-1',
           // Use patientMap first; fall back to whatever the engine stored
           name:      patientMap.get(inProg.patient_id)?.name
                      ?? inProg.patient_name
@@ -39,10 +39,9 @@ function buildDoctorCards(hospitalId, doctorMap, patientMap) {
     // ── waiting queue: resolve names from patientMap ───────────────────────
     const queue = doctorQueue.waiting.map((app, index) => {
       const appId = app.appointment_id || app.id;
-      const pos = queueEngine.getPatientPosition(appId);
       return {
         id: appId,
-        token: pos ? `Q-${pos}` : `Q-${(inProg ? 1 : 0) + index + 1}`,
+        token: queueEngine.getPatientToken(appId) ?? `Q-${(inProg ? 1 : 0) + index + 1}`,
         name: patientMap.get(app.patient_id)?.name
               ?? app.patient_name
               ?? 'Patient',

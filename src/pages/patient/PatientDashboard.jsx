@@ -14,13 +14,16 @@ import { createAppointmentChannel, removeChannel } from '../../services/realtime
 // Doctor and Reception dashboards.
 // ---------------------------------------------------------------------------
 function normalise(appointment) {
-  const status   = appointment.status; // 'waiting' | 'in_progress' | 'pending' | 'completed'
-  const isActive = status === 'waiting' || status === 'in_progress';
+  const engineApp = queueEngine.appointments.get(appointment.appointment_id);
+  const status    = engineApp ? engineApp.status : appointment.status;
+  const isActive  = status === 'waiting' || status === 'in_progress';
 
   // Position comes ONLY from the engine – never from the raw API object
   const position = isActive
     ? queueEngine.getPatientPosition(appointment.appointment_id)
     : null;
+
+  const tokenVal = queueEngine.getPatientToken(appointment.appointment_id);
 
   return {
     id:             appointment.appointment_id,
@@ -36,8 +39,8 @@ function normalise(appointment) {
     _raw_status:    status,
     _position:      position,
 
-    // Token: Q-N for active, "Pending" for upcoming, nothing for history
-    token_number: position ? `Q-${position}` : 'Pending',
+    // Token: static universal token for active, "Pending" for upcoming
+    token_number: tokenVal || 'Pending',
     serving_token: 'N/A', // patched in second pass below
 
     status:
@@ -55,33 +58,18 @@ function normalise(appointment) {
 //      CANONICAL active list (waiting + in_progress).
 //   3. The engine is now the single source of truth for queue order & tokens.
 // ---------------------------------------------------------------------------
-function deriveFromEngine(raw, userId) {
-  // Step 1 – feed the engine
-  queueEngine.buildQueues(raw);
-
+function deriveFromEngine(raw) {
   const now = new Date();
 
-  // Step 2 – history: past appointments from the raw API list
-  // (engine only tracks today's active queues; historical data lives in API)
+  // Step 1 – history: past appointments from the raw API list
   const history = raw.filter(a => new Date(a.booked_for) < now);
 
-  // Step 3 – build the canonical active list from the engine.
-  // We iterate the engine's internal queues and collect every appointment
-  // that belongs to this patient (matched by patient_id === userId).
-  const engineActive = [];
+  // Step 2 – active: appointments from raw list that are waiting or in_progress
+  const engineActive = raw.filter(
+    a => a.status === 'waiting' || a.status === 'in_progress'
+  );
 
-  queueEngine.queues.forEach((hospitalMap) => {
-    hospitalMap.forEach((doctorQueue) => {
-      [...doctorQueue.in_progress, ...doctorQueue.waiting].forEach(app => {
-        if (app.patient_id === userId) {
-          engineActive.push(app);
-        }
-      });
-    });
-  });
-
-  // Step 4 – also include "pending" (future-booked, not yet in engine queue)
-  // These come from the raw API list since the engine only holds today's slots.
+  // Step 3 – pending: future-booked, not yet active
   const engineActivIds = new Set(engineActive.map(a => a.appointment_id));
   const pendingFromApi = raw.filter(
     a =>
@@ -90,26 +78,27 @@ function deriveFromEngine(raw, userId) {
       !engineActivIds.has(a.appointment_id)
   );
 
-  // Step 5 – normalise (tokens from engine positions)
+  // Step 4 – normalise
   const normalisedActive  = engineActive.map(normalise);
   const normalisedPending = pendingFromApi.map(normalise);
 
-  // Step 6 – patch "serving_token" (the currently-in-progress token for the
-  // same doctor queue, so the patient can see who is being served right now)
+  // Step 5 – patch "serving_token" from global doctor queue
   const patchServingToken = (list) => {
     return list.map(a => {
       if (a._raw_status !== 'waiting' && a._raw_status !== 'in_progress') {
         return a;
       }
-      // Look up the queue for this specific doctor
-      // Note: hospital key is undefined, and doctor key is the doctor's name (a.doctor_name)
-      const doctorQueue = queueEngine.queues.get(undefined)?.get(a.doctor_name);
+      const engineApp = queueEngine.appointments.get(a.appointment_id);
       let servingLabel = 'N/A';
-      if (doctorQueue) {
-        const inProg = doctorQueue.in_progress[0];
-        if (inProg) {
-          const pos = queueEngine.getPatientPosition(inProg.appointment_id);
-          servingLabel = pos ? `Q-${pos}` : 'Q-1';
+      if (engineApp) {
+        const hospitalId = engineApp.hospital_id;
+        const doctorId = engineApp.assigned_doctor;
+        const doctorQueue = queueEngine.queues.get(hospitalId)?.get(doctorId);
+        if (doctorQueue) {
+          const inProg = doctorQueue.in_progress[0];
+          if (inProg) {
+            servingLabel = queueEngine.getPatientToken(inProg.appointment_id) || 'N/A';
+          }
         }
       }
       return { ...a, serving_token: servingLabel };
@@ -133,23 +122,32 @@ export default function PatientDashboard({ user }) {
   const channelRef = useRef(null);
   const navigate   = useNavigate();
 
+  const rawAppointmentsRef = useRef([]);
+
+  const deriveAndSet = useCallback((raw) => {
+    if (!raw) return;
+    const { liveData, pendingData, history } = deriveFromEngine(raw);
+    setLiveData(liveData);
+    setPendingData(pendingData);
+    setHistoryData(history);
+  }, [user]);
+
   const fetchPatientAppointments = useCallback(async () => {
     try {
       const res = await api('GET', 'patient/get-appointments');
       const raw = res.data?.data ?? [];
-
-      // Derive EVERYTHING from the engine after feeding it the raw data
-      const { liveData, pendingData, history } = deriveFromEngine(raw, user?.id);
-
-      setLiveData(liveData);
-      setPendingData(pendingData);
-      setHistoryData(history);
+      rawAppointmentsRef.current = raw;
+      deriveAndSet(raw);
     } catch (err) {
       console.error('Failed to fetch patient appointments:', err);
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, [deriveAndSet]);
+
+  const handleRealtimeEvent = useCallback(() => {
+    deriveAndSet(rawAppointmentsRef.current);
+  }, [deriveAndSet]);
 
   useEffect(() => {
     if (!user) return;
@@ -161,16 +159,16 @@ export default function PatientDashboard({ user }) {
 
     channelRef.current = createAppointmentChannel({
       filter:  undefined,
-      onEvent: fetchPatientAppointments,
+      onEvent: handleRealtimeEvent,
     });
 
-    pollingRef.current = setInterval(fetchPatientAppointments, 2000);
+    pollingRef.current = setInterval(fetchPatientAppointments, 15000);
 
     return () => {
       if (channelRef.current) removeChannel(channelRef.current);
       if (pollingRef.current) clearInterval(pollingRef.current);
     };
-  }, [user, fetchPatientAppointments]);
+  }, [user, fetchPatientAppointments, handleRealtimeEvent]);
 
   const handleCancel = async (appointmentId) => {
     setCancelling(appointmentId);
