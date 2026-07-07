@@ -80,8 +80,7 @@ export default function RegisterPatientModal({
             <select 
               value={newPatient.dept}
               onChange={(e) => {
-                setNewPatient({...newPatient, dept: e.target.value});
-                // We handle resetting doctorId in the parent component for cleaner logic
+                setNewPatient({...newPatient, dept: e.target.value, doctorId: ''});
               }}
               className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3.5 text-sm font-semibold outline-none focus:ring-2 focus:ring-blue-500/50 appearance-none"
             >
@@ -97,10 +96,15 @@ export default function RegisterPatientModal({
               onChange={(e) => setNewPatient({...newPatient, doctorId: e.target.value})}
               className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3.5 text-sm font-semibold outline-none focus:ring-2 focus:ring-blue-500/50 appearance-none"
             >
-              {availableFormDoctors.map(doc => (
-                <option key={doc.id} value={doc.id}>{doc.name} ({doc.queue.length} waiting)</option>
-              ))}
-              {availableFormDoctors.length === 0 && <option value="">No doctors available in this dept</option>}
+              <option value="" disabled>— Select a doctor —</option>
+              {availableFormDoctors.length === 0
+                ? <option value="" disabled>No doctors available in this dept</option>
+                : availableFormDoctors.map(doc => (
+                    <option key={doc.id} value={doc.id}>
+                      {doc.name} ({doc.queue?.length ?? 0} waiting)
+                    </option>
+                  ))
+              }
             </select>
           </div>
 
@@ -121,7 +125,7 @@ export default function RegisterPatientModal({
 
           <button 
             type="submit" 
-            disabled={availableFormDoctors.length === 0 || submitting}
+            disabled={availableFormDoctors.length === 0 || !newPatient.doctorId || submitting}
             className="w-full bg-blue-600 disabled:bg-slate-300 hover:bg-blue-700 text-white font-black py-4 rounded-xl mt-4 transition-all active:scale-[0.98] shadow-lg shadow-blue-500/25"
           >
             {submitting ? 'Registering...' : 'Create Token'}

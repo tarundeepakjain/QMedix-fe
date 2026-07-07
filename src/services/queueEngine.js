@@ -5,6 +5,7 @@ class QueueEngine {
     this.appointments = new Map();
     this.queues = new Map();
     this.positions = new Map();
+    this.tokens = new Map();
   }
 
   normalizeApp(app) {
@@ -33,7 +34,13 @@ class QueueEngine {
       if (a.isEmergency !== b.isEmergency) {
         return b.isEmergency - a.isEmergency;
       }
-      // then by created_at
+      // then by scheduled booked_for time slot
+      const dateA = new Date(a.booked_for);
+      const dateB = new Date(b.booked_for);
+      if (dateA.getTime() !== dateB.getTime()) {
+        return dateA - dateB;
+      }
+      // then by registration order (created_at)
       return new Date(a.created_at) - new Date(b.created_at);
     });
   }
@@ -62,9 +69,36 @@ class QueueEngine {
     });
   }
 
+  rebuildTokenNumbers(hospitalId, doctorId) {
+    const doctorQueue = this.queues.get(hospitalId)?.get(doctorId);
+    if (!doctorQueue) return;
+
+    const allApps = [
+      ...doctorQueue.in_progress,
+      ...doctorQueue.completed,
+      ...doctorQueue.waiting
+    ];
+
+    // Sort chronologically by created_at
+    allApps.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+
+    allApps.forEach((app, index) => {
+      const tokenVal = app.token ?? app.token_no ?? app.token_number ?? (index + 1);
+      const app_id = app.appointment_id || app.id;
+      this.tokens.set(app_id, tokenVal);
+    });
+  }
+
+  getPatientToken(appointmentId) {
+    const t = this.tokens.get(appointmentId);
+    if (!t) return null;
+    return typeof t === 'string' && t.startsWith('Q-') ? t : `Q-${t}`;
+  }
+
   buildQueues(appointments) {
     this.appointments.clear();
     this.queues.clear();
+    this.tokens.clear();
     if (!appointments) return;
 
     appointments.forEach(rawApp => {
@@ -96,6 +130,7 @@ class QueueEngine {
       hospital.forEach((_, doctorId) => {
         this.sortWaitingQueue(hospitalId, doctorId);
         this.rebuildPositions(hospitalId, doctorId);
+        this.rebuildTokenNumbers(hospitalId, doctorId);
       });
     });
   }
@@ -127,6 +162,7 @@ class QueueEngine {
       this.sortWaitingQueue(h, d);
     }
     this.rebuildPositions(h, d);
+    this.rebuildTokenNumbers(h, d);
   }
 
   handleUpdate(rawApp) {
@@ -155,6 +191,7 @@ class QueueEngine {
       this.sortWaitingQueue(h, d);
     }
     this.rebuildPositions(h, d);
+    this.rebuildTokenNumbers(h, d);
     this.appointments.set(newApp.appointment_id, newApp);
   }
 
@@ -175,6 +212,8 @@ class QueueEngine {
       list.splice(index, 1);
     }
     this.rebuildPositions(h, d);
+    this.rebuildTokenNumbers(h, d);
+    this.tokens.delete(app.appointment_id);
     this.appointments.delete(app.appointment_id);
   }
 

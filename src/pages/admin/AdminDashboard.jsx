@@ -122,6 +122,7 @@ function normaliseDepartmentQueues(hospitalId, staffDirectory) {
   const deptMap = {}; 
 
   hospitalMap.forEach((doctorQueue, doctorId) => {
+    if (!doctorId || doctorId === 'null' || doctorId === 'undefined') return;
     const docInfo = staffDirectory.find(s => s.id === doctorId && s.role === 'Doctor');
     const docName = docInfo?.name  || `Doctor ${doctorId.slice(0, 6)}`;
     const dept    = docInfo?.dept  || 'General';
@@ -130,7 +131,7 @@ function normaliseDepartmentQueues(hospitalId, staffDirectory) {
     const servingApp  = doctorQueue.in_progress[0] || null;
 
     const servingToken = servingApp
-      ? `Q-${queueEngine.getPatientPosition(servingApp.appointment_id) ?? 1}`
+      ? queueEngine.getPatientToken(servingApp.appointment_id)
       : null;
 
     const doctorCard = {

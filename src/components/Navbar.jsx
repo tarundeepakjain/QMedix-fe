@@ -81,7 +81,7 @@ navigate("/");
   onClick={() =>{{!user && setAlert({
     message:"Kindly login first",
     type:"warning"
-  })} handleNav(user ? `/${user?.role}/dashboard` : "/")}}
+  })} handleNav(user ? (user.role === 'hospital-staff' ? '/staff/dashboard' : `/${user?.role}/dashboard`) : "/")}}
   className={`font-black text-sm uppercase tracking-widest transition-colors 
     ${
       location.pathname.includes("dashboard")
