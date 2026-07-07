@@ -34,7 +34,13 @@ class QueueEngine {
       if (a.isEmergency !== b.isEmergency) {
         return b.isEmergency - a.isEmergency;
       }
-      // then by created_at
+      // then by scheduled booked_for time slot
+      const dateA = new Date(a.booked_for);
+      const dateB = new Date(b.booked_for);
+      if (dateA.getTime() !== dateB.getTime()) {
+        return dateA - dateB;
+      }
+      // then by registration order (created_at)
       return new Date(a.created_at) - new Date(b.created_at);
     });
   }
