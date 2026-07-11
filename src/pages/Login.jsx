@@ -49,8 +49,15 @@ export default function Login({onLogin}) {
         alert("Login failed");
       }
     } catch (error) {
-      console.log(`${role} Login Error:`, error);
-      alert("Invalid credentials.");
+      console.error(`${role} Login Error:`, error);
+      if (error.response) {
+        const message = error.response.data?.message || "Invalid credentials.";
+        alert(message);
+      } else if (error.request) {
+        alert("Could not connect to the backend server. Please verify your network connection, backend status, or VITE_BACKEND_URL configuration.");
+      } else {
+        alert(`Error: ${error.message}`);
+      }
     }
 
     setLoading(false);
